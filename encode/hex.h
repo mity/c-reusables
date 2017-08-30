@@ -44,8 +44,8 @@ extern "C" {
  * (in_size * 2 + 1).
  * If out_buf is not NULL, it returns the number of written hexadecimal digits.
  */
-ssize_t hex_encode(const void* in_buf, size_t in_size,
-                   char* out_buf, size_t out_size, int lowercase);
+int hex_encode(const void* in_buf, unsigned in_size,
+                   char* out_buf, unsigned out_size, int lowercase);
 
 /* Decodes string of hexadecimal notation (even count of digits) to a memory
  * pointed by out_buf. The function accepts both lowercase and uppercase
@@ -56,8 +56,8 @@ ssize_t hex_encode(const void* in_buf, size_t in_size,
  * If out_buf is not NULL, it returns the number of written bytes or -1
  * in case of error (e.g. parsing error or too small output buffer).
  */
-ssize_t hex_decode(const char* in_buf, size_t in_size,
-                   void* out_buf, size_t out_size);
+int hex_decode(const char* in_buf, unsigned in_size,
+                   void* out_buf, unsigned out_size);
 
 
 #ifdef __cplusplus

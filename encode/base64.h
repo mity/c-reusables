@@ -26,8 +26,6 @@
 #ifndef CRE_BASE64_H
 #define CRE_BASE64_H
 
-#include <stdlib.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -62,8 +60,8 @@ typedef struct BASE64_OPTIONS {
  * to the output buffer (excluding the zero-terminator).
  * On error, a negative value is returned.
  */
-ssize_t base64_encode(const void* in_buf, size_t in_size,
-                      char* out_buf, size_t out_size,
+int base64_encode(const void* in_buf, unsigned in_size,
+                      char* out_buf, unsigned out_size,
                       const BASE64_OPTIONS* options);
 
 
@@ -83,8 +81,8 @@ ssize_t base64_encode(const void* in_buf, size_t in_size,
  * On error, a negative value is returned.
  */
 
-ssize_t base64_decode(const char* in_buf, size_t in_size,
-                      void* out_buf, size_t out_size,
+int base64_decode(const char* in_buf, unsigned in_size,
+                      void* out_buf, unsigned out_size,
                       const BASE64_OPTIONS* options);
 
 

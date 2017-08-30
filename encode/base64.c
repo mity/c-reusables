@@ -36,17 +36,17 @@ static const char base64_table_core[62] =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 
-ssize_t
-base64_encode(const void* in_buf, size_t in_size,
-              char* out_buf, size_t out_size,
+int
+base64_encode(const void* in_buf, unsigned in_size,
+              char* out_buf, unsigned out_size,
               const BASE64_OPTIONS* options)
 {
     char table[64];
     const uint8_t* in = (const uint8_t*) in_buf;
     char* out = out_buf;
-    size_t out_size_needed;
-    size_t in_off = 0;
-    size_t out_off = 0;
+    unsigned out_size_needed;
+    unsigned in_off = 0;
+    unsigned out_off = 0;
     unsigned v;
 
     if(options == NULL)
@@ -124,18 +124,18 @@ base64_encode(const void* in_buf, size_t in_size,
     return out_off;
 }
 
-ssize_t
-base64_decode(const char* in_buf, size_t in_size,
-              void* out_buf, size_t out_size,
+int
+base64_decode(const char* in_buf, unsigned in_size,
+              void* out_buf, unsigned out_size,
               const BASE64_OPTIONS* options)
 {
     uint8_t table[256];
     int i;
     const char* in = in_buf;
     uint8_t* out = (uint8_t*) out_buf;
-    size_t out_size_needed;
-    size_t in_off = 0;
-    size_t out_off = 0;
+    unsigned out_size_needed;
+    unsigned in_off = 0;
+    unsigned out_off = 0;
     unsigned v;
 
     if(options == NULL)

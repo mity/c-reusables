@@ -26,9 +26,9 @@
 #include "hex.h"
 
 
-ssize_t
-hex_encode(const void* in_buf, size_t in_size,
-           char* out_buf, size_t out_size, int lowercase)
+int
+hex_encode(const void* in_buf, unsigned in_size,
+           char* out_buf, unsigned out_size, int lowercase)
 {
     static const char lower_xdigits[16] = "0123456789abcdef";
     static const char upper_xdigits[16] = "0123456789ABCDEF";
@@ -63,8 +63,8 @@ hex_encode(const void* in_buf, size_t in_size,
     return out - out_buf;
 }
 
-ssize_t
-hex_decode(const char* in_buf, size_t in_size, void* out_buf, size_t out_size)
+int
+hex_decode(const char* in_buf, unsigned in_size, void* out_buf, unsigned out_size)
 {
     const char* in = in_buf;
     const char* in_end = in + in_size;

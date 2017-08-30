@@ -66,7 +66,7 @@ test_base64_encode_(const TEST_VECTOR* vectors, const BASE64_OPTIONS* options)
     for(i = 0; vectors[i].blob != NULL; i++) {
         const char* blob = vectors[i].blob;
         const char* base64 = vectors[i].base64;
-        ssize_t out_size;
+        int out_size;
 
         out_size = base64_encode(blob, strlen(blob), NULL, 0, options);
         if(!TEST_CHECK_(out_size == strlen(base64)+1,
@@ -107,7 +107,7 @@ test_base64_decode_(const TEST_VECTOR* vectors, const BASE64_OPTIONS* options)
     for(i = 0; vectors[i].blob != NULL; i++) {
         const char* blob = vectors[i].blob;
         const char* base64 = vectors[i].base64;
-        ssize_t out_size;
+        int out_size;
 
         out_size = base64_decode(base64, strlen(base64), NULL, 0, options);
         if(!TEST_CHECK_(out_size == strlen(blob),
