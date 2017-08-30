@@ -29,6 +29,10 @@
 #include <string.h>
 
 
+#ifdef _WIN32
+    #define snprintf    _snprintf
+#endif
+
 
 #define CMDLINE_AUXBUF_SIZE     32
 
