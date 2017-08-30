@@ -46,6 +46,8 @@ rules apply:
 
 ### Directory `misc`
 
+ * `misc/cmdline.[hc]`: Lightweight command line (`argc`, `argv`) parsing.
+
  * `misc/defs.h`: Defining set of basic an frequently used preprocessor macros
    `MIN`, `MAX`, `CLAMP`, `ABS`, `SIZEOF_ARRAY`, `OFFSETOF`, `CONTAINEROF`
    etc.

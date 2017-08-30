@@ -20,6 +20,9 @@ target_include_directories(test-hex PRIVATE ../encode)
 add_executable(test-fnv1a acutest.h test-fnv1a.c ../hash/fnv1a.h ../hash/fnv1a.c)
 target_include_directories(test-fnv1a PRIVATE ../hash)
 
+add_executable(test-cmdline acutest.h test-cmdline.c ../misc/cmdline.h ../misc/cmdline.c)
+target_include_directories(test-cmdline PRIVATE ../misc)
+
 add_executable(test-defs acutest.h test-defs.c ../misc/defs.h)
 target_include_directories(test-defs PRIVATE ../misc)
 
