@@ -1,3 +1,7 @@
+[![Build status (travis-ci.com)](https://img.shields.io/travis/mity/c-reusables/master.svg?label=linux%20build)](https://travis-ci.org/mity/c-reusables)
+[![Build status (appveyor.com)](https://img.shields.io/appveyor/ci/mity/c-reusables/master.svg?label=windows%20build)](https://ci.appveyor.com/project/mity/c-reusables/branch/master)
+[![Codecov](https://img.shields.io/codecov/c/github/mity/c-reusables/master.svg?label=code%20coverage)](https://codecov.io/github/mity/c-reusables)
+
 
 # C Reusables Readme
 
