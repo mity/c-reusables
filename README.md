@@ -17,7 +17,7 @@ rules apply:
    repository.
 
  * Distributing: Just take the sources of interest is enough. Copyright
-   notes and licensing terms are placed within each, so no aditional
+   notes and licensing terms are placed within each, so no additional
    files like `LICENSE.md` are needed.
 
  * Self-contained: Each module is single `*.c` source file with single `*.h`
@@ -27,7 +27,7 @@ rules apply:
    of the exposed functions and types.
 
  * High portability: All POSIX compatible systems and Windows are supported.
-   Most other systems problably too.
+   Most other systems probably too.
 
 
 ## Table of Contents
@@ -48,7 +48,7 @@ rules apply:
 
  * `misc/cmdline.[hc]`: Lightweight command line (`argc`, `argv`) parsing.
 
- * `misc/defs.h`: Defining set of basic an frequently used preprocessor macros
+ * `misc/defs.h`: Defining set of basic and frequently used preprocessor macros
    `MIN`, `MAX`, `CLAMP`, `ABS`, `SIZEOF_ARRAY`, `OFFSETOF`, `CONTAINEROF`
    etc.
 
