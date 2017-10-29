@@ -41,6 +41,8 @@ rules apply:
 
 ### Directory `hash`
 
+ * `hash/crc32.[hc]`: 32-byt cyclic redundancy check function.
+
  * `hash/fnv1a.[hc]`: 32-bit and 64-bit Fowler–Noll–Vo (variant 1a) hash
    functions.
 

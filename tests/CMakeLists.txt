@@ -17,6 +17,9 @@ target_include_directories(test-base64 PRIVATE ../encode)
 add_executable(test-hex acutest.h test-hex.c ../encode/hex.h ../encode/hex.c)
 target_include_directories(test-hex PRIVATE ../encode)
 
+add_executable(test-crc32 acutest.h test-crc32.c ../hash/crc32.h ../hash/crc32.c)
+target_include_directories(test-crc32 PRIVATE ../hash)
+
 add_executable(test-fnv1a acutest.h test-fnv1a.c ../hash/fnv1a.h ../hash/fnv1a.c)
 target_include_directories(test-fnv1a PRIVATE ../hash)
 
