@@ -41,15 +41,15 @@ typedef struct TEST_VECTOR {
  */
 
 
-#define LEN(x) (sizeof(x)-1)
+#define LEN(x)      (sizeof(x)-1)
 /* TEST macro does not include trailing NUL byte in the test vector */
-#define TEST(x) x, LEN(x)
+#define TEST(x)     x, LEN(x)
 /* TEST0 macro includes the trailing NUL byte in the test vector */
-#define TEST0(x) x, sizeof(x)
+#define TEST0(x)    x, sizeof(x)
 /* REPEAT500 - repeat a string 500 times */
-#define R500(x) R100(x)R100(x)R100(x)R100(x)R100(x)
-#define R100(x) R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)
-#define R10(x) x x x x x x x x x x
+#define R500(x)     R100(x)R100(x)R100(x)R100(x)R100(x)
+#define R100(x)     R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)R10(x)
+#define R10(x)      x x x x x x x x x x
 
 static const TEST_VECTOR test_vectrors[] = {
     { TEST(""), 0x811c9dc5U, 0xcbf29ce484222325U },
@@ -270,7 +270,7 @@ test_fnv1a_32(void)
         uint32_t expected = test_vectrors[i].fnv32;
         uint32_t produced;
 
-        produced = fnv1a_32(FNV1A_BASE_32, test_vectrors[i].str, test_vectrors[i].n);
+        produced = fnv1a_32(FNV1A_BASE_32, str, n);
         if(!TEST_CHECK_(produced == expected, "vector '%.*s'", (int)n, str)) {
             TEST_MSG("Expected: %x", (unsigned) expected);
             TEST_MSG("Produced: %x", (unsigned) produced);
@@ -289,7 +289,7 @@ test_fnv1a_64(void)
         uint64_t expected = test_vectrors[i].fnv64;
         uint64_t produced;
 
-        produced = fnv1a_64(FNV1A_BASE_64, test_vectrors[i].str, test_vectrors[i].n);
+        produced = fnv1a_64(FNV1A_BASE_64, str, n);
         if(!TEST_CHECK_(produced == expected, "vector '%.*s'", (int)n, str)) {
             TEST_MSG("Expected: %llx", (unsigned) expected);
             TEST_MSG("Produced: %llx", (unsigned) produced);
