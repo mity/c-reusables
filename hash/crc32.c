@@ -26,11 +26,6 @@
 #include "crc32.h"
 
 
-#define CRC32_POLY      0xedb88320U
-#define CRC32_INITXOR   0xffffffffU
-#define CRC32_FINALXOR  0xffffffffU
-
-
 #if 0
 /* Program used for pre-computing the table below. */
 
@@ -118,6 +113,9 @@ static uint32_t crc32_table[256] = {
     0xbdbdf21cU, 0xcabac28aU, 0x53b39330U, 0x24b4a3a6U, 0xbad03605U, 0xcdd70693U, 0x54de5729U, 0x23d967bfU,
     0xb3667a2eU, 0xc4614ab8U, 0x5d681b02U, 0x2a6f2b94U, 0xb40bbe37U, 0xc30c8ea1U, 0x5a05df1bU, 0x2d02ef8dU
 };
+
+#define CRC32_INITXOR   0xffffffffU
+#define CRC32_FINALXOR  0xffffffffU
 
 uint32_t
 crc32(const void* data, size_t n)
