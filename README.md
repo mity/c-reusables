@@ -62,3 +62,8 @@ rules apply:
    variant of `malloca()` and `freea()` from Windows SDKs by Microsoft.
    `MALLOCA()` allocates on stack if requested size below some threashold,
    for larger allocations it uses `malloc()`.
+
+### Directory `win32` (Windows only)
+
+ * `win32/memstream.[hc]`: Trivial read-only implementation of `ISteam` COM
+   interface.
