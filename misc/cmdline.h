@@ -26,6 +26,9 @@
 #ifndef CRE_CMDLINE_H
 #define CRE_CMDLINE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /* The option may have an argument. (Affects only long option.) */
@@ -116,5 +119,9 @@ int cmdline_read(const CMDLINE_OPTION* options, int argc, char** argv,
         int (*callback)(int /*id*/, const char* /*arg*/, void* /*userdata*/),
         void* userdata);
 
+
+#ifdef __cplusplus
+}  /* extern "C" { */
+#endif
 
 #endif  /* CRE_CMDLINE_H */
