@@ -32,6 +32,10 @@ rules apply:
 
 ## Table of Contents
 
+### Directory `data`
+
+ * `data/buffer.[hc]`: Simple growing buffer.
+
 ### Directory `encode`
 
  * `encode/base64.[hc]`: Encoding and decoding Base64.
