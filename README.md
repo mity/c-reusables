@@ -45,7 +45,7 @@ rules apply:
 
 ### Directory `hash`
 
- * `hash/crc32.[hc]`: 32-byt cyclic redundancy check function.
+ * `hash/crc32.[hc]`: 32-bit cyclic redundancy check function.
 
  * `hash/fnv1a.[hc]`: 32-bit and 64-bit Fowler–Noll–Vo (variant 1a) hash
    functions.
@@ -60,10 +60,10 @@ rules apply:
 
  * `misc/malloca.h`: `MALLOCA()` and `FREEA()` macros, which are a portable
    variant of `malloca()` and `freea()` from Windows SDKs by Microsoft.
-   `MALLOCA()` allocates on stack if requested size below some threashold,
+   `MALLOCA()` allocates on stack if requested size below some threshold,
    for larger allocations it uses `malloc()`.
 
 ### Directory `win32` (Windows only)
 
- * `win32/memstream.[hc]`: Trivial read-only implementation of `ISteam` COM
-   interface.
+ * `win32/memstream.[hc]`: Trivial memory-backed read-only implementation of
+   `IStream` COM interface.
