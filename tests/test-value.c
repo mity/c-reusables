@@ -879,8 +879,8 @@ test_dict_walk_ordered(void)
 
     /* Verify the value_dict_walk_ordered() walks the dict in the order in
      * which we added the values into it. */
-    TEST_CHECK(dict_size(&d) == N);
     value_dict_walk_ordered(&d, test_dict_walk_ordered_callback, (void*) &ctx);
+    TEST_CHECK(ctx.iter == N);
 
     value_fini(&d);
 }

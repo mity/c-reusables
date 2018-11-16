@@ -339,16 +339,17 @@ value_init_dict(VALUE* v, unsigned flags)
     uint8_t* payload;
     size_t payload_size;
 
-    if(flags & VALUE_DICT_MAINTAINORDER) {
+    if(flags & VALUE_DICT_MAINTAINORDER)
         payload_size = sizeof(DICT);
-        v->data[0] |= HAS_ORDERLIST;
-    } else {
+    else
         payload_size = OFFSETOF(DICT, order_head);
-    }
 
     payload = value_init_ex(v, VALUE_DICT, payload_size, sizeof(void*));
     if(payload == NULL)
         return -1;
+
+    if(flags & VALUE_DICT_MAINTAINORDER)
+        v->data[0] |= HAS_ORDERLIST;
 
     memset(payload, 0, payload_size);
 
