@@ -10,21 +10,21 @@ Home: https://github.com/mity/c-reusables
 
 ## Introduction
 
-This repository is collection of highly reusable C utilities. The following
-rules apply:
+This repository is collection of assorted highly reusable C utilities.
+The following rules apply:
 
  * Licensing: Only code under MIT or in Public Domain is accepted into the
    repository.
 
- * Distributing: Just take the sources of interest is enough. Copyright
-   notes and licensing terms are placed within each, so no additional
-   files like `LICENSE.md` are needed.
+ * Distributing: Just taking the sources of your interest is enough. Copyright
+   notes and licensing terms are placed within each source file. Additional
+   files like `LICENSE.md` are **not** required to be distributed.
 
  * Self-contained: Each module is single `*.c` source file with single `*.h`
-   header (or just the header) with no other dependencies but system
-   headers and standard C library. Each such module implements only tightly
-   related set of functions. Each header provides reasonable documentation
-   of the exposed functions and types.
+   header (or just the header in some cases) with no other dependencies but
+   system headers and standard C library. Each such module implements only
+   tightly related set of functions. Each header provides reasonable
+   documentation of the exposed functions and types.
 
  * High portability: All POSIX compatible systems and Windows are supported.
    Most other systems probably too.
@@ -35,6 +35,11 @@ rules apply:
 ### Directory `data`
 
  * `data/buffer.[hc]`: Simple growing buffer.
+
+ * `data/value.[hc]`: Simple value structure, capable of holding various scalar
+   types of data (booleans, numeric types, strings) and collections (arrays,
+   dictionaries) of such data. It allows to build structured data in run-time;
+   for example it can be used as an in-memory storage for JSON-like data.
 
 ### Directory `encode`
 

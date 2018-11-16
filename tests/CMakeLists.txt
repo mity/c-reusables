@@ -11,8 +11,14 @@ elseif(MSVC)
 endif()
 
 
+add_definitions(-DCRE_TEST)
+
+
 add_executable(test-buffer acutest.h test-buffer.c ../data/buffer.h ../data/buffer.c)
 target_include_directories(test-buffer PRIVATE ../data)
+
+add_executable(test-value acutest.h test-value.c ../data/value.h ../data/value.c)
+target_include_directories(test-value PRIVATE ../data)
 
 add_executable(test-base64 acutest.h test-base64.c ../encode/base64.h ../encode/base64.c)
 target_include_directories(test-base64 PRIVATE ../encode)
