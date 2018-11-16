@@ -88,8 +88,8 @@ struct DICT_tag {
 /* We don't want to include <math.h> just because of roundf() and round().
  * Especially as on some systems it requires explicit linking with math
  * library (-lm). */
-#define ROUNDF(inttype, f)   ((inttype)((f) >= 0.0f ? (f) + 0.5f : (f) - 0.5f))
-#define ROUNDD(inttype, d)   ((inttype)((d) >= 0.0 ? (d) + 0.5 : (d) - 0.5))
+#define ROUNDF(inttype, x)   ((inttype)((x) >= 0.0f ? (x) + 0.5f : (x) - 0.5f))
+#define ROUNDD(inttype, x)   ((inttype)((x) >= 0.0 ? (x) + 0.5 : (x) - 0.5))
 
 
 static void*
@@ -307,7 +307,7 @@ value_init_string_(VALUE* v, const char* str, size_t len)
         payload[off++] = 0x80 | (tmplen & 0x7f);
         tmplen = tmplen >> 7;
     }
-    payload[off++] = tmplen;
+    payload[off++] = tmplen & 0x7f;
 
     memcpy(payload + off, str, len);
     payload[off + len] = '\0';
@@ -397,6 +397,8 @@ value_int32(const VALUE* v)
         float f;
         double d;
     } ret;
+
+    float ff = 0.5f;
 
     switch(value_type(v)) {
         case VALUE_INT32:     memcpy(&ret.i32, payload, sizeof(int32_t)); return (int32_t) ret.i32;
