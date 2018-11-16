@@ -670,6 +670,37 @@ test_array_insert(void)
     value_fini(&a);
 }
 
+static void
+test_array_remove(void)
+{
+    const int N = 500000;
+
+    VALUE a;
+    VALUE* v;
+    int i;
+
+    value_init_array(&a);
+    for(i = 0; i < N; i++) {
+        v = value_array_append(&a);
+        value_init_int32(v, i);
+    }
+
+    value_array_remove_range(&a, N / 10, N / 5);
+    TEST_CHECK(value_array_size(&a) == N - (N / 5));
+
+    for(i = 0; i < N / 10; i++) {
+        v = value_array_get(&a, i);
+        TEST_CHECK(value_int32(v) == i);
+    }
+
+    for(i = N / 10; i < N - (N / 5) - 1; i++) {
+        v = value_array_get(&a, i);
+        TEST_CHECK(value_int32(v) == i + N / 5);
+    }
+
+    value_fini(&a);
+}
+
 static int
 dict_size_callback(const VALUE* key, VALUE* value, void* ctx)
 {
@@ -821,6 +852,7 @@ TEST_LIST = {
     { "array-basic",    test_array_basic },
     { "array-append",   test_array_append },
     { "array-insert",   test_array_insert },
+    { "array-remove",   test_array_remove },
     { "dict-basic",     test_dict_basic },
     { "dict-big",       test_dict_big },
     { "dict-remove",    test_dict_remove },
