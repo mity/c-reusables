@@ -14,20 +14,20 @@ Home: https://github.com/mity/c-reusables
 This repository is collection of assorted highly reusable C utilities.
 The following rules apply:
 
- * Licensing: Only code under MIT or in Public Domain is accepted into the
+ * **Licensing**: Only code under MIT or in Public Domain is accepted into the
    repository.
 
- * Distributing: Just taking the sources of your interest is enough. Copyright
-   notes and licensing terms are placed within each source file. Additional
-   files like `LICENSE.md` are **not** required to be distributed.
+ * **Distributing**: Just taking the sources of your interest is enough.
+   Copyright notes and licensing terms are placed within each source file.
+   Additional files like `LICENSE.md` are **not** required to be distributed.
 
- * Self-contained: Each module is single `*.c` source file with single `*.h`
-   header (or just the header in some cases) with no other dependencies but
-   system headers and standard C library. Each such module implements only
+ * **Self-contained**: Each module is single `*.c` source file with single
+   `*.h` header (or just the header in some cases) with no other dependencies
+   but system headers and standard C library. Each such module implements only
    tightly related set of functions. Each header provides reasonable
    documentation of the exposed functions and types.
 
- * High portability: All POSIX compatible systems and Windows are supported.
+ * **High portability**: All POSIX compatible systems and Windows are supported.
    Most other systems probably too.
 
 
@@ -73,3 +73,11 @@ The following rules apply:
 
  * `win32/memstream.[hc]`: Trivial memory-backed read-only implementation of
    `IStream` COM interface.
+
+
+## Reporting Bugs
+
+If you encounter any bug, please be so kind and report it. Unheard bugs cannot
+get fixed. You can submit bug reports here:
+
+* http://github.com/mity/c-reusables/issues
