@@ -838,24 +838,72 @@ test_dict_remove(void)
     value_fini(&d);
 }
 
+typedef struct TEST_DICT_WALK_ORDERED_CTX {
+    const char** keys;
+    int iter;
+} TEST_DICT_WALK_ORDERED_CTX;
+
+static int
+test_dict_walk_ordered_callback(const VALUE* key, VALUE* value, void* arg)
+{
+    TEST_DICT_WALK_ORDERED_CTX* ctx = (TEST_DICT_WALK_ORDERED_CTX*) arg;
+
+    TEST_CHECK(strcmp(value_string(key), ctx->keys[ctx->iter]) == 0);
+    ctx->iter++;
+    return 0;
+}
+
+static void
+test_dict_walk_ordered(void)
+{
+    static const char* keys[] = { "a", "c", "h", "i", "e", "g", "d", "b", "f" };
+    static const int N = sizeof(keys) / sizeof(keys[0]);
+
+    VALUE d;
+    VALUE* v;
+    int i;
+    TEST_DICT_WALK_ORDERED_CTX ctx = { keys, 0 };
+
+    value_init_dict(&d, VALUE_DICT_MAINTAINORDER);
+    for(i = 0; i < N / 2; i++) {
+        v = value_dict_get(&d, keys[i]);
+        value_init_string(v, keys[i]);
+    }
+    v = value_dict_get(&d, "rm");
+    value_init_string(v, "rm");
+    for(i = N / 2; i < N; i++) {
+        v = value_dict_get(&d, keys[i]);
+        value_init_string(v, keys[i]);
+    }
+    value_dict_remove(&d, "rm");
+
+    /* Verify the value_dict_walk_ordered() walks the dict in the order in
+     * which we added the values into it. */
+    TEST_CHECK(dict_size(&d) == N);
+    value_dict_walk_ordered(&d, test_dict_walk_ordered_callback, (void*) &ctx);
+
+    value_fini(&d);
+}
+
 
 TEST_LIST = {
-    { "null",           test_null },
-    { "bool",           test_bool },
-    { "int32",          test_int32 },
-    { "uint32",         test_uint32 },
-    { "int64",          test_int64 },
-    { "uint64",         test_uint64 },
-    { "float",          test_float },
-    { "double",         test_double },
-    { "string",         test_string },
-    { "array-basic",    test_array_basic },
-    { "array-append",   test_array_append },
-    { "array-insert",   test_array_insert },
-    { "array-remove",   test_array_remove },
-    { "dict-basic",     test_dict_basic },
-    { "dict-big",       test_dict_big },
-    { "dict-remove",    test_dict_remove },
+    { "null",               test_null },
+    { "bool",               test_bool },
+    { "int32",              test_int32 },
+    { "uint32",             test_uint32 },
+    { "int64",              test_int64 },
+    { "uint64",             test_uint64 },
+    { "float",              test_float },
+    { "double",             test_double },
+    { "string",             test_string },
+    { "array-basic",        test_array_basic },
+    { "array-append",       test_array_append },
+    { "array-insert",       test_array_insert },
+    { "array-remove",       test_array_remove },
+    { "dict-basic",         test_dict_basic },
+    { "dict-big",           test_dict_big },
+    { "dict-remove",        test_dict_remove },
+    { "dict-walk-ordered",  test_dict_walk_ordered },
     { 0 }
 };
 
