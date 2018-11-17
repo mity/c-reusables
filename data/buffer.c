@@ -25,8 +25,6 @@
 
 #include "buffer.h"
 
-#include <string.h>
-
 
 BUFFER*
 buffer_alloc(void)
@@ -49,7 +47,7 @@ buffer_free(BUFFER* buf)
 int
 buffer_realloc(BUFFER* buf, size_t alloc)
 {
-    char* tmp;
+    void* tmp;
 
     tmp = realloc(buf->data, alloc);
     if(tmp == NULL  &&  alloc > 0)
@@ -80,7 +78,7 @@ buffer_shrink(BUFFER* buf)
 }
 
 int
-buffer_insert(BUFFER* buf, size_t pos, const char* data, size_t n)
+buffer_insert(BUFFER* buf, size_t pos, const void* data, size_t n)
 {
     if(buf->size + n > buf->alloc) {
         if(buffer_realloc(buf, (buf->size + n) * 2) != 0)
