@@ -398,8 +398,6 @@ value_int32(const VALUE* v)
         double d;
     } ret;
 
-    float ff = 0.5f;
-
     switch(value_type(v)) {
         case VALUE_INT32:     memcpy(&ret.i32, payload, sizeof(int32_t)); return (int32_t) ret.i32;
         case VALUE_UINT32:    memcpy(&ret.u32, payload, sizeof(uint32_t)); return (int32_t) ret.u32;
