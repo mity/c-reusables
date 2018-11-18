@@ -86,8 +86,8 @@ buffer_insert(BUFFER* buf, size_t pos, const void* data, size_t n)
     }
 
     if(buf->size > pos)
-        memmove(buf->data + pos + n, buf->data + pos, buf->size - pos);
-    memcpy(buf->data + pos, data, n);
+        memmove((uint8_t*)buf->data + pos + n, (uint8_t*)buf->data + pos, buf->size - pos);
+    memcpy((uint8_t*)buf->data + pos, data, n);
     buf->size += n;
     return 0;
 }
@@ -96,7 +96,7 @@ void
 buffer_remove(BUFFER* buf, size_t pos, size_t n)
 {
     if(pos + n < buf->size) {
-        memmove(buf->data + pos, buf->data + pos + n, n);
+        memmove((uint8_t*)buf->data + pos, (uint8_t*)buf->data + pos + n, n);
         buf->size -= n;
     } else {
         buf->size = pos;
