@@ -227,6 +227,44 @@ value_is_new(const VALUE* v)
     return (v != NULL  &&  value_type(v) == VALUE_NULL  &&  (v->data[0] & IS_NEW));
 }
 
+VALUE*
+value_path(VALUE* root, const char* path)
+{
+    const char* token_beg = path;
+    const char* token_end;
+    VALUE* v = root;
+
+    while(1) {
+        token_end = token_beg;
+        while(*token_end != '\0'  &&  *token_end != '/')
+            token_end++;
+
+        if(token_end - token_beg > 2  &&  token_beg[0] == '['  &&  token_end[-1] == ']') {
+            size_t index = 0;
+
+            token_beg++;
+            while('0' <= *token_beg  &&  *token_beg <= '9') {
+                index = index * 10 + (*token_beg - '0');
+                token_beg++;
+            }
+            if(*token_beg != ']')
+                return NULL;
+
+            v = value_array_get(v, index);
+        } else if(token_end - token_beg > 0) {
+            v = value_dict_find_(v, token_beg, token_end - token_beg);
+        }
+
+        if(v == NULL)
+            return NULL;
+
+        if(*token_end == '\0')
+            return v;
+
+        token_beg = token_end+1;
+    }
+}
+
 
 /********************
  *** Initializers ***

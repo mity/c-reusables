@@ -97,6 +97,39 @@ int value_is_compatible(const VALUE* v, VALUE_TYPE type);
  */
 int value_is_new(const VALUE* v);
 
+/* Simple recursive getter, capable to get VALUE deep in the hierarchy formed
+ * by nested arrays and dictionaries.
+ *
+ * Limitations: The function is not capable to deal with object keys which
+ * contain zero byte '\0', slash '/' or brackets '[' ']' because those are
+ * interpreted by the function as special characters:
+ *
+ *  -- '/' delimits dictionary keys and array indexes.
+ *  -- '[' ']' enclose array indexes (for distinguishing from numbered
+ *     dictionary keys).
+ *  -- '\0' terminates the whole path (as is normal with C strings).
+ *
+ * Examples:
+ *
+ *  (1) value_path(root, "") gets directly the root.
+
+ *  (2) value_path(root, "foo") gets value keyed with 'foo' if root is a
+ *      dictionary having such value, or NULL otherwise.
+ *
+ *  (3) value_path(root, "[4]") gets value with index 4 if root is an array
+ *      having so many members, or NULL otherwise.
+ *
+ *  (4) value_path(root, "foo/[2]/bar/baz/[3]") walks deeper and deeper and
+ *      returns a value stored there assuming these all conditions are true:
+ *       -- root is dictionary having the key "foo";
+ *       -- that value is a nested list having the index [2];
+ *       -- that value is a nested dictionary having the key "bar";
+ *       -- that value is a nested dictionary having the key "baz";
+ *       -- and finally, that is a list having the index [3].
+ *      If any of those is not fulfilled, then NULL is returned.
+ */
+VALUE* value_path(VALUE* root, const char* path);
+
 
 /******************
  *** VALUE_NULL ***

@@ -935,6 +935,51 @@ test_dict_walk_ordered(void)
 }
 
 
+static void
+test_path(void)
+{
+    VALUE root;
+    VALUE* foo;
+    VALUE* bar;
+    VALUE* bar0;
+    VALUE* bar1;
+    VALUE* bar2;
+
+    TEST_CHECK(value_init_dict(&root, 0) == 0);
+    foo = value_dict_get(&root, "foo");
+    TEST_CHECK(value_init_dict(foo, 0) == 0);
+    bar = value_dict_get(foo, "bar");
+    TEST_CHECK(value_init_array(bar) == 0);
+    TEST_CHECK(value_array_append(bar) != NULL);
+    TEST_CHECK(value_array_append(bar) != NULL);
+    TEST_CHECK(value_array_append(bar) != NULL);
+    bar0 = value_array_get(bar, 0);
+    bar1 = value_array_get(bar, 1);
+    bar2 = value_array_get(bar, 2);
+
+    TEST_CHECK(value_path(NULL, "") == NULL);
+    TEST_CHECK(value_path(&root, "") == &root);
+    TEST_CHECK(value_path(&root, "/") == &root);
+    TEST_CHECK(value_path(&root, "foo") == foo);
+    TEST_CHECK(value_path(&root, "/foo") == foo);
+    TEST_CHECK(value_path(&root, "/foo/") == foo);
+    TEST_CHECK(value_path(&root, "foo/bar") == bar);
+    TEST_CHECK(value_path(&root, "/foo/bar/") == bar);
+    TEST_CHECK(value_path(&root, "/foo/bar/[0]") == bar0);
+    TEST_CHECK(value_path(&root, "/foo/bar/[1]") == bar1);
+    TEST_CHECK(value_path(&root, "/foo/bar/[2]") == bar2);
+    TEST_CHECK(value_path(&root, "/foo/bar/[3]") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar/[]") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar/[x]") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar/0") == NULL);
+    TEST_CHECK(value_path(&root, "/[0]") == NULL);
+    TEST_CHECK(value_path(&root, "xxx/yyy") == NULL);
+    TEST_CHECK(value_path(&root, "foo/yyy") == NULL);
+    TEST_CHECK(value_path(&root, "xxx/foo") == NULL);
+    TEST_CHECK(value_path(&root, "xxx/bar") == NULL);
+}
+
+
 TEST_LIST = {
     { "null",               test_null },
     { "bool",               test_bool },
@@ -953,6 +998,7 @@ TEST_LIST = {
     { "dict-big",           test_dict_big },
     { "dict-remove",        test_dict_remove },
     { "dict-walk-ordered",  test_dict_walk_ordered },
+    { "path",               test_path },
     { 0 }
 };
 
