@@ -69,15 +69,20 @@ test_base64_encode_(const TEST_VECTOR* vectors, const BASE64_OPTIONS* options)
         int out_size;
 
         out_size = base64_encode(blob, strlen(blob), NULL, 0, options);
-        if(!TEST_CHECK_(out_size == strlen(base64)+1,
-                        "expected output size for '%s' -> '%s'", blob, base64)) {
+        if(!TEST_CHECK_(out_size >= 0  &&
+                        out_size == strlen(base64)+1,
+                        "expected output size for '%s' -> '%s'", blob, base64))
+        {
             TEST_MSG("Expected: %d bytes", (int) strlen(base64));
             TEST_MSG("Produced: %d bytes", (int) out_size);
         }
 
         out_size = base64_encode(blob, strlen(blob), out_buf, sizeof(out_buf), options);
-        if(!TEST_CHECK_(out_size == strlen(base64)  &&  memcmp(out_buf, base64, out_size) == 0,
-                        "encoding '%s' -> %s", blob, base64)) {
+        if(!TEST_CHECK_(out_size >= 0  &&
+                        out_size == strlen(base64)  &&
+                        memcmp(out_buf, base64, out_size) == 0,
+                        "encoding '%s' -> %s", blob, base64))
+        {
             TEST_MSG("Expected: '%s'", base64);
             TEST_MSG("Produced: '%s'", (out_size > 0 ? out_buf : "base64_encode() failed"));
         }
@@ -110,15 +115,20 @@ test_base64_decode_(const TEST_VECTOR* vectors, const BASE64_OPTIONS* options)
         int out_size;
 
         out_size = base64_decode(base64, strlen(base64), NULL, 0, options);
-        if(!TEST_CHECK_(out_size == strlen(blob),
-                        "expected output size for '%s' -> '%s'", base64, blob)) {
+        if(!TEST_CHECK_(out_size >= 0  &&
+                        out_size == strlen(blob),
+                        "expected output size for '%s' -> '%s'", base64, blob))
+        {
             TEST_MSG("Expected: %d bytes", (int) strlen(blob));
             TEST_MSG("Produced: %d bytes", (int) out_size);
         }
 
         out_size = base64_decode(base64, strlen(base64), out_buf, sizeof(out_buf), options);
-        if(!TEST_CHECK_(out_size == strlen(blob)  &&  memcmp(out_buf, blob, out_size) == 0,
-                        "decoding '%s' -> '%s'", base64, blob)) {
+        if(!TEST_CHECK_(out_size >= 0  &&
+                        out_size == strlen(blob)  &&
+                        memcmp(out_buf, blob, out_size) == 0,
+                        "decoding '%s' -> '%s'", base64, blob))
+        {
             TEST_MSG("Expected: '%s'", blob);
             TEST_MSG("Produced: '%s'", (out_size > 0 ? out_buf : "base64_decode() failed"));
         }
