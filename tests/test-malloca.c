@@ -92,15 +92,26 @@ test_malloca_large(void)
 static void
 test_malloca_ultralarge(void)
 {
-    /* Ridiculously large MALLOCA allocation should always fail and return NULL
-     * the same way as for malloc().
+    /* Attempt to allocate something ultra-large should always fail and return
+     * NULL, the same way as malloc() does.
      *
      * The ridiculous expressions are to pass over warning
      * -Walloc-size-larger-than= included in -Wall (gcc 7.2.0 on Linux).
      */
+    size_t size = SIZE_MAX / 2 - 8;
+    void* ptr;
 
-    TEST_CHECK(malloc(SIZE_MAX / 2 - 8) == NULL);
-    TEST_CHECK(MALLOCA(SIZE_MAX / 2 - 8) == NULL);
+
+    /* Verify that malloc() fails. If not, we have chosen too small size
+     * and our test needs some tuning... */
+    ptr = malloc(size);
+    TEST_CHECK(ptr == NULL);
+    free(ptr);      /* Should not be needed if it really works ;-) */
+
+    /* And now test that MALLOCA fails the same way. */
+    ptr = MALLOCA(size);
+    TEST_CHECK(ptr == NULL);
+    free(ptr);      /* Should not be needed if it really works ;-) */
 }
 
 static void
