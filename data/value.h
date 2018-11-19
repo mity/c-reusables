@@ -213,20 +213,18 @@ size_t value_string_length(const VALUE* v);
  *
  * Note that all functions returning VALUE* allow caller to modify
  * the value in-place by re-initializing the value.
+ *
+ * WARNING: Modifying contents of an array (i.e. inserting, appending and also
+ * removing a value)  can lead to reallocation of internal array buffer.
+ * Hence, consider all VALUE* pointers invalid after modifying the array.
+ * That includes the return values of value_array_get(), value_array_get_all(),
+ * but also preceding calls of value_array_append() and value_array_insert().
  */
 int value_init_array(VALUE* v);
 
 /* Get count of items in the array.
  */
 size_t value_array_size(const VALUE* v);
-
-/* Get single value in the list.
- */
-VALUE* value_array_get(const VALUE* v, size_t index);
-
-/* Get pointer to internal array holding all the values.
- */
-VALUE* value_array_get_all(const VALUE* v);
 
 /* Get the specified item.
  */
@@ -252,7 +250,7 @@ void value_array_clean(VALUE* v);
 
 
 /******************
- *** VAKUE_DICT ***
+ *** VALUE_DICT ***
  ******************/
 
 /* Dictionary of values. (Internally implemented as red-black tree.)
