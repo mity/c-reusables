@@ -136,6 +136,9 @@ value_init_simple(VALUE* v, VALUE_TYPE type, const void* data, size_t size)
 static uint8_t*
 value_payload_ex(VALUE* v, size_t align)
 {
+    if(v == NULL)
+        return NULL;
+
     if(!(v->data[0] & IS_MALLOCED))
         return (void*)(v->data + align);
     else
@@ -156,6 +159,8 @@ value_payload(VALUE* v)
 VALUE_TYPE
 value_type(const VALUE* v)
 {
+    if(v == NULL)
+        return VALUE_NULL;
     return (VALUE_TYPE)(v->data[0] & TYPE_MASK);
 }
 
@@ -219,7 +224,7 @@ value_is_compatible(const VALUE* v, VALUE_TYPE type)
 int
 value_is_new(const VALUE* v)
 {
-    return (v->data[0] & IS_NEW) ? 1 : 0;
+    return (v != NULL  &&  value_type(v) == VALUE_NULL  &&  (v->data[0] & IS_NEW));
 }
 
 
@@ -230,7 +235,8 @@ value_is_new(const VALUE* v)
 void
 value_init_null(VALUE* v)
 {
-    v->data[0] = (uint8_t) VALUE_NULL;
+    if(v != NULL)
+        v->data[0] = (uint8_t) VALUE_NULL;
 }
 
 static void
@@ -239,46 +245,69 @@ value_init_new(VALUE* v)
     v->data[0] = ((uint8_t) VALUE_NULL) | IS_NEW;
 }
 
-void
+int
 value_init_bool(VALUE* v, int b)
 {
+    if(v == NULL)
+        return -1;
+
     v->data[0] = (uint8_t) VALUE_BOOL;
     v->data[1] = (b != 0) ? 1 : 0;
+
+    return 0;
 }
 
 int
 value_init_int32(VALUE* v, int32_t i32)
 {
+    if(v == NULL)
+        return -1;
+
     return value_init_simple(v, VALUE_INT32, &i32, sizeof(int32_t));
 }
 
 int
 value_init_uint32(VALUE* v, uint32_t u32)
 {
+    if(v == NULL)
+        return -1;
+
     return value_init_simple(v, VALUE_UINT32, &u32, sizeof(uint32_t));
 }
 
 int
 value_init_int64(VALUE* v, int64_t i64)
 {
+    if(v == NULL)
+        return -1;
+
     return value_init_simple(v, VALUE_INT64, &i64, sizeof(int64_t));
 }
 
 int
 value_init_uint64(VALUE* v, uint64_t u64)
 {
+    if(v == NULL)
+        return -1;
+
     return value_init_simple(v, VALUE_UINT64, &u64, sizeof(uint64_t));
 }
 
 int
 value_init_float(VALUE* v, float f)
 {
+    if(v == NULL)
+        return -1;
+
     return value_init_simple(v, VALUE_FLOAT, &f, sizeof(float));
 }
 
 int
 value_init_double(VALUE* v, double d)
 {
+    if(v == NULL)
+        return -1;
+
     return value_init_simple(v, VALUE_DOUBLE, &d, sizeof(double));
 }
 
@@ -288,6 +317,9 @@ value_init_string_(VALUE* v, const char* str, size_t len)
     uint8_t* payload;
     size_t tmplen;
     size_t off;
+
+    if(v == NULL)
+        return -1;
 
     tmplen = len;
     off = 0;
@@ -325,6 +357,9 @@ value_init_array(VALUE* v)
 {
     uint8_t* payload;
 
+    if(v == NULL)
+        return -1;
+
     payload = value_init_ex(v, VALUE_ARRAY, sizeof(ARRAY), sizeof(void*));
     if(payload == NULL)
         return -1;
@@ -338,6 +373,9 @@ value_init_dict(VALUE* v, unsigned flags)
 {
     uint8_t* payload;
     size_t payload_size;
+
+    if(v == NULL)
+        return -1;
 
     if(flags & VALUE_DICT_MAINTAINORDER)
         payload_size = sizeof(DICT);
@@ -359,6 +397,9 @@ value_init_dict(VALUE* v, unsigned flags)
 void
 value_fini(VALUE* v)
 {
+    if(v == NULL)
+        return;
+
     if(value_type(v) == VALUE_ARRAY)
         value_array_clean(v);
 
@@ -883,6 +924,9 @@ value_dict_get_(VALUE* v, const char* key, size_t key_len)
     RBTREE* path[RBTREE_MAX_HEIGHT];
     int path_len = 0;
     int cmp;
+
+    if(d == NULL)
+        return NULL;
 
     while(node != NULL) {
         cmp = value_dict_cmp(key, key_len,

@@ -37,6 +37,17 @@ test_null(void)
 {
     VALUE v = VALUE_NULL_INITIALIZER;
 
+    TEST_CHECK(value_is_compatible(NULL, VALUE_NULL));
+    TEST_CHECK(!value_is_compatible(NULL, VALUE_BOOL));
+    TEST_CHECK(!value_is_compatible(NULL, VALUE_INT32));
+    TEST_CHECK(!value_is_compatible(NULL, VALUE_UINT32));
+    TEST_CHECK(!value_is_compatible(NULL, VALUE_INT64));
+    TEST_CHECK(!value_is_compatible(NULL, VALUE_UINT64));
+    TEST_CHECK(!value_is_compatible(NULL, VALUE_FLOAT));
+    TEST_CHECK(!value_is_compatible(NULL, VALUE_DOUBLE));
+    TEST_CHECK(!value_is_compatible(NULL, VALUE_ARRAY));
+    TEST_CHECK(!value_is_compatible(NULL, VALUE_DICT));
+
     TEST_CHECK(value_is_compatible(&v, VALUE_NULL));
     TEST_CHECK(!value_is_compatible(&v, VALUE_BOOL));
     TEST_CHECK(!value_is_compatible(&v, VALUE_INT32));
@@ -64,7 +75,12 @@ test_bool(void)
 {
     VALUE v;
 
-    value_init_bool(&v, 1 == 1);
+    TEST_CHECK(value_init_bool(NULL, 0) != 0);
+    TEST_CHECK(value_init_bool(NULL, 1) != 0);
+    TEST_CHECK(value_bool(NULL) != 0);
+    TEST_CHECK(value_bool(NULL) != 1);
+
+    TEST_CHECK(value_init_bool(&v, 1 == 1) == 0);
     TEST_CHECK(value_type(&v) == VALUE_BOOL);
     TEST_CHECK(!value_is_compatible(&v, VALUE_NULL));
     TEST_CHECK(value_is_compatible(&v, VALUE_BOOL));
@@ -79,7 +95,7 @@ test_bool(void)
     TEST_CHECK(value_bool(&v));
     value_fini(&v);
 
-    value_init_bool(&v, 1 == 0);
+    TEST_CHECK(value_init_bool(&v, 1 == 0) == 0);
     TEST_CHECK(value_type(&v) == VALUE_BOOL);
     TEST_CHECK(!value_is_compatible(&v, VALUE_NULL));
     TEST_CHECK(value_is_compatible(&v, VALUE_BOOL));
@@ -94,7 +110,7 @@ test_bool(void)
     TEST_CHECK(!value_bool(&v));
     value_fini(&v);
 
-    value_init_bool(&v, 0xaabbccdd);
+    TEST_CHECK(value_init_bool(&v, 0xaabbccdd) == 0);
     TEST_CHECK(value_bool(&v) == 1);
     value_fini(&v);
 }
@@ -104,7 +120,9 @@ test_int32(void)
 {
     VALUE v;
 
-    value_init_int32(&v, 0);
+    TEST_CHECK(value_init_int32(NULL, 0) != 0);
+
+    TEST_CHECK(value_init_int32(&v, 0) == 0);
     TEST_CHECK(value_type(&v) == VALUE_INT32);
     TEST_CHECK(!value_is_compatible(&v, VALUE_NULL));
     TEST_CHECK(!value_is_compatible(&v, VALUE_BOOL));
@@ -178,6 +196,8 @@ test_uint32(void)
 {
     VALUE v;
 
+    TEST_CHECK(value_init_uint32(NULL, 0) != 0);
+
     value_init_uint32(&v, 0U);
     TEST_CHECK(value_type(&v) == VALUE_UINT32);
     TEST_CHECK(!value_is_compatible(&v, VALUE_NULL));
@@ -223,6 +243,8 @@ static void
 test_int64(void)
 {
     VALUE v;
+
+    TEST_CHECK(value_init_int64(NULL, 0) != 0);
 
     value_init_int64(&v, 0);
     TEST_CHECK(value_type(&v) == VALUE_INT64);
@@ -303,6 +325,8 @@ test_uint64(void)
 {
     VALUE v;
 
+    TEST_CHECK(value_init_uint64(NULL, 0) != 0);
+
     value_init_uint64(&v, 0U);
     TEST_CHECK(value_type(&v) == VALUE_UINT64);
     TEST_CHECK(!value_is_compatible(&v, VALUE_NULL));
@@ -345,6 +369,8 @@ static void
 test_float(void)
 {
     VALUE v;
+
+    TEST_CHECK(value_init_float(NULL, 0.0f) != 0);
 
     value_init_float(&v, 0.0f);
     TEST_CHECK(value_type(&v) == VALUE_FLOAT);
@@ -428,6 +454,8 @@ static void
 test_double(void)
 {
     VALUE v;
+
+    TEST_CHECK(value_init_double(NULL, 0.0) != 0);
 
     value_init_double(&v, 0.0);
     TEST_CHECK(value_type(&v) == VALUE_DOUBLE);
@@ -518,6 +546,8 @@ test_string(void)
 
     VALUE v;
 
+    TEST_CHECK(value_init_string(NULL, "") != 0);
+
     value_init_string(&v, NULL);                /* Same as "". */
     TEST_CHECK(value_type(&v) == VALUE_STRING);
     TEST_CHECK(value_string_length(&v) == 0);
@@ -566,6 +596,17 @@ test_array_basic(void)
 {
     VALUE a;
     VALUE* v;
+
+    TEST_CHECK(value_init_array(NULL) != 0);
+    TEST_CHECK(value_array_size(NULL) == 0);
+    TEST_CHECK(value_array_get(NULL, 0) == NULL);
+    TEST_CHECK(value_array_get_all(NULL) == NULL);
+    TEST_CHECK(value_array_append(NULL) == NULL);
+    TEST_CHECK(value_array_insert(NULL, 0) == NULL);
+    TEST_CHECK(value_array_insert(NULL, 123) == NULL);
+    TEST_CHECK(value_array_remove(NULL, 0) != 0);
+    TEST_CHECK(value_array_remove_range(NULL, 0, 123) != 0);
+    value_array_clean(NULL);
 
     value_init_array(&a);
     TEST_CHECK(value_type(&a) == VALUE_ARRAY);
@@ -728,6 +769,14 @@ test_dict_basic(void)
     VALUE* foo;
     VALUE* bar;
     VALUE* baz;
+
+    TEST_CHECK(value_init_dict(NULL, 0) != 0);
+    TEST_CHECK(value_dict_find(NULL, "foo") == NULL);
+    TEST_CHECK(value_dict_get(NULL, "foo") == NULL);
+    TEST_CHECK(value_dict_remove(NULL, "foo") != 0);
+    TEST_CHECK(value_dict_walk_ordered(NULL, NULL, NULL) != 0);
+    TEST_CHECK(value_dict_walk_sorted(NULL, NULL, NULL) != 0);
+    value_dict_clean(NULL);
 
     value_init_dict(&d, 0);
     TEST_CHECK(value_type(&d) == VALUE_DICT);

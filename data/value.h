@@ -120,7 +120,7 @@ void value_init_null(VALUE* v);
  *** VALUE_BOOL ***
  ******************/
 
-void value_init_bool(VALUE* v, int b);
+int value_init_bool(VALUE* v, int b);
 
 int value_bool(const VALUE* v);
 
