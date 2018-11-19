@@ -120,7 +120,7 @@ test_freea_null(void)
     /* Just check this does not cause SIGSEGV. */
 
     FREEA(NULL);
-    TEST_CHECK_(1, "FREEA(NULL) is noop that never crahes.");
+    TEST_CHECK_(1, "FREEA(NULL) is noop that never crashes.");
 }
 
 
