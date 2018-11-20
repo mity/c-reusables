@@ -272,6 +272,10 @@ void value_array_clean(VALUE* v);
 
 int value_init_dict(VALUE* v, unsigned flags);
 
+/* Get count of items in the dictionary.
+ */
+size_t value_dict_size(VALUE* v);
+
 /* Find an item with the given key, or return NULL of no such item exists.
  */
 VALUE* value_dict_find_(const VALUE* v, const char* key, size_t key_len);

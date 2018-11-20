@@ -65,6 +65,7 @@ struct RBTREE_tag {
 typedef struct DICT_tag DICT;
 struct DICT_tag {
     RBTREE* root;
+    size_t size;
 
     /* These are present only if HAS_ORDERLIST. */
     RBTREE* order_head;
@@ -401,8 +402,8 @@ value_init_array(VALUE* v)
     payload = value_init_ex(v, VALUE_ARRAY, sizeof(ARRAY), sizeof(void*));
     if(payload == NULL)
         return -1;
-
     memset(payload, 0, sizeof(ARRAY));
+
     return 0;
 }
 
@@ -423,11 +424,10 @@ value_init_dict(VALUE* v, unsigned flags)
     payload = value_init_ex(v, VALUE_DICT, payload_size, sizeof(void*));
     if(payload == NULL)
         return -1;
+    memset(payload, 0, payload_size);
 
     if(flags & VALUE_DICT_MAINTAINORDER)
         v->data[0] |= HAS_ORDERLIST;
-
-    memset(payload, 0, payload_size);
 
     return 0;
 }
@@ -824,6 +824,17 @@ value_dict_cmp(const char* key1, size_t len1, const char* key2, size_t len2)
     return cmp;
 }
 
+size_t
+value_dict_size(VALUE* v)
+{
+    DICT* d = value_dict_payload((VALUE*) v);
+
+    if(d != NULL)
+        return d->size;
+    else
+        return 0;
+}
+
 VALUE*
 value_dict_find_(const VALUE* v, const char* key, size_t key_len)
 {
@@ -1019,6 +1030,8 @@ value_dict_get_(VALUE* v, const char* key, size_t key_len)
     /* Re-balance. */
     path[path_len++] = node;
     value_dict_fix_after_insert(d, path, path_len);
+
+    d->size++;
 
     return &node->value;
 }
@@ -1247,6 +1260,7 @@ value_dict_remove_(VALUE* v, const char* key, size_t key_len)
     value_fini(&node->key);
     value_fini(&node->value);
     free(node);
+    d->size--;
 
     return 0;
 }

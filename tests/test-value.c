@@ -742,26 +742,6 @@ test_array_remove(void)
     value_fini(&a);
 }
 
-static int
-dict_size_callback(const VALUE* key, VALUE* value, void* ctx)
-{
-    size_t* size = (size_t*) ctx;
-
-    TEST_CHECK(key != NULL);
-    TEST_CHECK(value != NULL);
-
-    *size = *size + 1;
-    return 0;
-}
-
-static size_t
-dict_size(VALUE* d)
-{
-    size_t size = 0;
-    value_dict_walk_sorted(d, dict_size_callback, &size);
-    return size;
-}
-
 static void
 test_dict_basic(void)
 {
@@ -791,11 +771,11 @@ test_dict_basic(void)
     TEST_CHECK(!value_is_compatible(&d, VALUE_ARRAY));
     TEST_CHECK(value_is_compatible(&d, VALUE_DICT));
     TEST_CHECK(value_dict_find(&d, "n/a") == NULL);
-    TEST_CHECK(dict_size(&d) == 0);
+    TEST_CHECK(value_dict_size(&d) == 0);
     TEST_CHECK(value_dict_get(&d, "new") != NULL);
-    TEST_CHECK(dict_size(&d) == 1);
+    TEST_CHECK(value_dict_size(&d) == 1);
     value_dict_clean(&d);
-    TEST_CHECK(dict_size(&d) == 0);
+    TEST_CHECK(value_dict_size(&d) == 0);
     value_fini(&d);
 
     value_init_dict(&d, 0);
@@ -805,7 +785,7 @@ test_dict_basic(void)
     value_init_string(bar, "bar value");
     baz = value_dict_get(&d, "baz");
     value_init_string(baz, "baz value");
-    TEST_CHECK(dict_size(&d) == 3);
+    TEST_CHECK(value_dict_size(&d) == 3);
     TEST_CHECK(value_dict_find(&d, "foo") == foo);
     TEST_CHECK(value_dict_find(&d, "bar") == bar);
     TEST_CHECK(value_dict_find(&d, "baz") == baz);
@@ -832,7 +812,7 @@ test_dict_big(void)
         v = value_dict_get(&d, key);
         TEST_CHECK(v != NULL  &&  value_init_int32(v, i) == 0);
     }
-    TEST_CHECK(dict_size(&d) == N);
+    TEST_CHECK(value_dict_size(&d) == N);
     for(i = 0; i < N; i++) {
         sprintf(key, "%d", i);
         v = value_dict_find(&d, key);
@@ -840,7 +820,7 @@ test_dict_big(void)
     }
     TEST_CHECK(value_dict_verify(&d) == 0);
     value_dict_clean(&d);
-    TEST_CHECK(dict_size(&d) == 0);
+    TEST_CHECK(value_dict_size(&d) == 0);
     value_fini(&d);
 }
 
@@ -871,7 +851,7 @@ test_dict_remove(void)
     }
     TEST_CHECK(value_dict_remove(&d, "n/a") != 0);
 
-    TEST_CHECK(dict_size(&d) == N - n_removed);
+    TEST_CHECK(value_dict_size(&d) == N - n_removed);
 
     for(i = 0; i < N; i++) {
         sprintf(key, "%d", i);
@@ -883,7 +863,7 @@ test_dict_remove(void)
     }
 
     value_dict_clean(&d);
-    TEST_CHECK(dict_size(&d) == 0);
+    TEST_CHECK(value_dict_size(&d) == 0);
     value_fini(&d);
 }
 
