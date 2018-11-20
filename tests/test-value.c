@@ -666,7 +666,7 @@ test_array_basic(void)
 static void
 test_array_append(void)
 {
-    const int N = 500000;
+    const int N = 100000;
 
     VALUE a;
     VALUE* v;
@@ -688,7 +688,7 @@ test_array_append(void)
 static void
 test_array_insert(void)
 {
-    const int N = 500000;
+    const int N = 100000;
 
     VALUE a;
     VALUE* v;
@@ -714,7 +714,7 @@ test_array_insert(void)
 static void
 test_array_remove(void)
 {
-    const int N = 500000;
+    const int N = 100000;
 
     VALUE a;
     VALUE* v;
@@ -805,7 +805,7 @@ test_dict_basic(void)
 static void
 test_dict_big(void)
 {
-    const int N = 500000;
+    const int N = 100000;
 
     VALUE d;
     VALUE* v;
@@ -833,7 +833,7 @@ test_dict_big(void)
 static void
 test_dict_remove(void)
 {
-    const int N = 500000;
+    const int N = 100000;
 
     VALUE d;
     VALUE* v;
