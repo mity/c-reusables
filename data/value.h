@@ -274,7 +274,7 @@ int value_init_dict(VALUE* v, unsigned flags);
 
 /* Get count of items in the dictionary.
  */
-size_t value_dict_size(VALUE* v);
+size_t value_dict_size(const VALUE* v);
 
 /* Get all keys.
  *
@@ -282,7 +282,7 @@ size_t value_dict_size(VALUE* v);
  *
  * Returns count of retrieved keys.
  */
-size_t value_dict_keys(VALUE* v, const VALUE** buffer, size_t buffer_size);
+size_t value_dict_keys(const VALUE* v, const VALUE** buffer, size_t buffer_size);
 
 /* Find an item with the given key, or return NULL of no such item exists.
  */

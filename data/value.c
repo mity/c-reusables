@@ -838,7 +838,7 @@ value_dict_leftmost_path(RBTREE** path, RBTREE* node)
 }
 
 size_t
-value_dict_size(VALUE* v)
+value_dict_size(const VALUE* v)
 {
     DICT* d = value_dict_payload((VALUE*) v);
 
@@ -849,7 +849,7 @@ value_dict_size(VALUE* v)
 }
 
 size_t
-value_dict_keys(VALUE* v, const VALUE** buffer, size_t buffer_size)
+value_dict_keys(const VALUE* v, const VALUE** buffer, size_t buffer_size)
 {
     DICT* d = value_dict_payload((VALUE*) v);
     RBTREE* stack[RBTREE_MAX_HEIGHT];
