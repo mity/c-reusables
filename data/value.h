@@ -85,20 +85,20 @@ VALUE_TYPE value_type(const VALUE* v);
  */
 int value_is_compatible(const VALUE* v, VALUE_TYPE type);
 
-/* Values newly added into array or dictionary are of type NULL.
+/* Values newly added into array or dictionary are of type VALUE_NULL.
  *
  * Additionally a flag marks the value was never explicitly initialized by
  * the application. This function checks the flag, and allows caller to
  * distinguish whether the value was just added; or whether it was value
  * NULL already present in the container.
  *
- * To reset the "new" flag, application may re-initialize the value with
- * init_null() (or any other initializer function).
+ * Caller is supposed to initialize the newly added value with any of the
+ * value_init_XXX() functions, and hence reset the flag).
  */
 int value_is_new(const VALUE* v);
 
-/* Simple recursive getter, capable to get VALUE deep in the hierarchy formed
- * by nested arrays and dictionaries.
+/* Simple recursive getter, capable to get a value dwelling deep in the
+ * hierarchy formed by nested arrays and dictionaries.
  *
  * Limitations: The function is not capable to deal with object keys which
  * contain zero byte '\0', slash '/' or brackets '[' ']' because those are
@@ -286,16 +286,25 @@ size_t value_dict_keys(VALUE* v, const VALUE** buffer, size_t buffer_size);
 
 /* Find an item with the given key, or return NULL of no such item exists.
  */
-VALUE* value_dict_find_(const VALUE* v, const char* key, size_t key_len);
-VALUE* value_dict_find(const VALUE* v, const char* key);
+VALUE* value_dict_get_(const VALUE* v, const char* key, size_t key_len);
+VALUE* value_dict_get(const VALUE* v, const char* key);
 
-/* Get value of the given key. If no such value exists, new one is added.
- * Application can check for such situation with is_new().
+/* Add new item with the given key of type VALUE_NULL.
+ *
+ * Returns NULL if the key is already used.
+ */
+VALUE* value_dict_add_(VALUE* v, const char* key, size_t key_len);
+VALUE* value_dict_add(VALUE* v, const char* key);
+
+/* This is combined operation of value_dict_get() and value_dict_add().
+ *
+ * Get value of the given key. If no such value exists, new one is added.
+ * Application can check for such situation with value_is_new().
  *
  * NULL is returned only in an out of memory condition.
  */
-VALUE* value_dict_get_(VALUE* v, const char* key, size_t key_len);
-VALUE* value_dict_get(VALUE* v, const char* key);
+VALUE* value_dict_get_or_add_(VALUE* v, const char* key, size_t key_len);
+VALUE* value_dict_get_or_add(VALUE* v, const char* key);
 
 /* Remove and destroy the given item from the dictionary.
  */

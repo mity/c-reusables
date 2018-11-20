@@ -752,8 +752,8 @@ test_dict_basic(void)
     const VALUE* keys[8];
 
     TEST_CHECK(value_init_dict(NULL, 0) != 0);
-    TEST_CHECK(value_dict_find(NULL, "foo") == NULL);
     TEST_CHECK(value_dict_get(NULL, "foo") == NULL);
+    TEST_CHECK(value_dict_get_or_add(NULL, "foo") == NULL);
     TEST_CHECK(value_dict_remove(NULL, "foo") != 0);
     TEST_CHECK(value_dict_walk_ordered(NULL, NULL, NULL) != 0);
     TEST_CHECK(value_dict_walk_sorted(NULL, NULL, NULL) != 0);
@@ -771,29 +771,29 @@ test_dict_basic(void)
     TEST_CHECK(!value_is_compatible(&d, VALUE_DOUBLE));
     TEST_CHECK(!value_is_compatible(&d, VALUE_ARRAY));
     TEST_CHECK(value_is_compatible(&d, VALUE_DICT));
-    TEST_CHECK(value_dict_find(&d, "n/a") == NULL);
+    TEST_CHECK(value_dict_get(&d, "n/a") == NULL);
     TEST_CHECK(value_dict_size(&d) == 0);
-    TEST_CHECK(value_dict_get(&d, "new") != NULL);
+    TEST_CHECK(value_dict_get_or_add(&d, "new") != NULL);
     TEST_CHECK(value_dict_size(&d) == 1);
     value_dict_clean(&d);
     TEST_CHECK(value_dict_size(&d) == 0);
     value_fini(&d);
 
     value_init_dict(&d, 0);
-    foo = value_dict_get(&d, "foo");
+    foo = value_dict_get_or_add(&d, "foo");
     value_init_string(foo, "foo value");
-    bar = value_dict_get(&d, "bar");
+    bar = value_dict_get_or_add(&d, "bar");
     value_init_string(bar, "bar value");
-    baz = value_dict_get(&d, "baz");
+    baz = value_dict_get_or_add(&d, "baz");
     value_init_string(baz, "baz value");
     TEST_CHECK(value_dict_size(&d) == 3);
-    TEST_CHECK(value_dict_find(&d, "foo") == foo);
-    TEST_CHECK(value_dict_find(&d, "bar") == bar);
-    TEST_CHECK(value_dict_find(&d, "baz") == baz);
-    TEST_CHECK(value_dict_find(&d, "n/a") == NULL);
     TEST_CHECK(value_dict_get(&d, "foo") == foo);
     TEST_CHECK(value_dict_get(&d, "bar") == bar);
     TEST_CHECK(value_dict_get(&d, "baz") == baz);
+    TEST_CHECK(value_dict_get(&d, "n/a") == NULL);
+    TEST_CHECK(value_dict_get_or_add(&d, "foo") == foo);
+    TEST_CHECK(value_dict_get_or_add(&d, "bar") == bar);
+    TEST_CHECK(value_dict_get_or_add(&d, "baz") == baz);
 
     TEST_CHECK(value_dict_keys(&d, keys, 8) == 3);
     TEST_CHECK(strcmp(value_string(keys[0]), "bar") == 0);
@@ -815,13 +815,13 @@ test_dict_big(void)
     value_init_dict(&d, 0);
     for(i = 0; i < N; i++) {
         sprintf(key, "%d", i);
-        v = value_dict_get(&d, key);
+        v = value_dict_get_or_add(&d, key);
         TEST_CHECK(v != NULL  &&  value_init_int32(v, i) == 0);
     }
     TEST_CHECK(value_dict_size(&d) == N);
     for(i = 0; i < N; i++) {
         sprintf(key, "%d", i);
-        v = value_dict_find(&d, key);
+        v = value_dict_get(&d, key);
         TEST_CHECK(v != NULL  &&  value_int32(v) == i);
     }
     TEST_CHECK(value_dict_verify(&d) == 0);
@@ -844,7 +844,7 @@ test_dict_remove(void)
     value_init_dict(&d, 0);
     for(i = 0; i < N; i++) {
         sprintf(key, "%d", i);
-        v = value_dict_get(&d, key);
+        v = value_dict_get_or_add(&d, key);
         TEST_CHECK(v != NULL);
         value_init_int32(v, i);
     }
@@ -861,7 +861,7 @@ test_dict_remove(void)
 
     for(i = 0; i < N; i++) {
         sprintf(key, "%d", i);
-        v = value_dict_find(&d, key);
+        v = value_dict_get(&d, key);
         if(i % 17 == 0)
             TEST_CHECK(v == NULL);
         else
@@ -901,13 +901,13 @@ test_dict_walk_ordered(void)
 
     value_init_dict(&d, VALUE_DICT_MAINTAINORDER);
     for(i = 0; i < N / 2; i++) {
-        v = value_dict_get(&d, keys[i]);
+        v = value_dict_get_or_add(&d, keys[i]);
         value_init_string(v, keys[i]);
     }
-    v = value_dict_get(&d, "rm");
+    v = value_dict_get_or_add(&d, "rm");
     value_init_string(v, "rm");
     for(i = N / 2; i < N; i++) {
-        v = value_dict_get(&d, keys[i]);
+        v = value_dict_get_or_add(&d, keys[i]);
         value_init_string(v, keys[i]);
     }
     value_dict_remove(&d, "rm");
@@ -932,9 +932,9 @@ test_path(void)
     VALUE* bar2;
 
     TEST_CHECK(value_init_dict(&root, 0) == 0);
-    foo = value_dict_get(&root, "foo");
+    foo = value_dict_get_or_add(&root, "foo");
     TEST_CHECK(value_init_dict(foo, 0) == 0);
-    bar = value_dict_get(foo, "bar");
+    bar = value_dict_get_or_add(foo, "bar");
     TEST_CHECK(value_init_array(bar) == 0);
     TEST_CHECK(value_array_append(bar) != NULL);
     TEST_CHECK(value_array_append(bar) != NULL);

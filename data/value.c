@@ -253,7 +253,7 @@ value_path(VALUE* root, const char* path)
 
             v = value_array_get(v, index);
         } else if(token_end - token_beg > 0) {
-            v = value_dict_find_(v, token_beg, token_end - token_beg);
+            v = value_dict_get_(v, token_beg, token_end - token_beg);
         }
 
         if(v == NULL)
@@ -872,7 +872,7 @@ value_dict_keys(VALUE* v, const VALUE** buffer, size_t buffer_size)
 }
 
 VALUE*
-value_dict_find_(const VALUE* v, const char* key, size_t key_len)
+value_dict_get_(const VALUE* v, const char* key, size_t key_len)
 {
     DICT* d = value_dict_payload((VALUE*) v);
     RBTREE* node = (d != NULL) ? d->root : NULL;
@@ -893,9 +893,9 @@ value_dict_find_(const VALUE* v, const char* key, size_t key_len)
 }
 
 VALUE*
-value_dict_find(const VALUE* v, const char* key)
+value_dict_get(const VALUE* v, const char* key)
 {
-    return value_dict_find_(v, key, (key != NULL) ? strlen(key) : 0);
+    return value_dict_get_(v, key, (key != NULL) ? strlen(key) : 0);
 }
 
 static void
@@ -1002,7 +1002,21 @@ value_dict_fix_after_insert(DICT* d, RBTREE** path, int path_len)
 }
 
 VALUE*
-value_dict_get_(VALUE* v, const char* key, size_t key_len)
+value_dict_add_(VALUE* v, const char* key, size_t key_len)
+{
+    VALUE* res;
+
+    res = value_dict_get_or_add_(v, key, key_len);
+    return (value_is_new(res) ? res : NULL);
+}
+
+VALUE* value_dict_add(VALUE* v, const char* key)
+{
+    return value_dict_add_(v, key, strlen(key));
+}
+
+VALUE*
+value_dict_get_or_add_(VALUE* v, const char* key, size_t key_len)
 {
     DICT* d = value_dict_payload((VALUE*) v);
     RBTREE* node = (d != NULL) ? d->root : NULL;
@@ -1073,9 +1087,9 @@ value_dict_get_(VALUE* v, const char* key, size_t key_len)
 }
 
 VALUE*
-value_dict_get(VALUE* v, const char* key)
+value_dict_get_or_add(VALUE* v, const char* key)
 {
-    return value_dict_get_(v, key, (key != NULL) ? strlen(key) : 0);
+    return value_dict_get_or_add_(v, key, (key != NULL) ? strlen(key) : 0);
 }
 
 /* Fixes the tree after making the given path one black node shorter.
