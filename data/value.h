@@ -276,6 +276,14 @@ int value_init_dict(VALUE* v, unsigned flags);
  */
 size_t value_dict_size(VALUE* v);
 
+/* Get all keys.
+ *
+ * If the buffer is too small, only subset of keys may be retrieved.
+ *
+ * Returns count of retrieved keys.
+ */
+size_t value_dict_keys(VALUE* v, const VALUE** buffer, size_t buffer_size);
+
 /* Find an item with the given key, or return NULL of no such item exists.
  */
 VALUE* value_dict_find_(const VALUE* v, const char* key, size_t key_len);

@@ -824,6 +824,19 @@ value_dict_cmp(const char* key1, size_t len1, const char* key2, size_t len2)
     return cmp;
 }
 
+static int
+value_dict_leftmost_path(RBTREE** path, RBTREE* node)
+{
+    int n = 0;
+
+    while(node != NULL) {
+        path[n++] = node;
+        node = node->left;
+    }
+
+    return n;
+}
+
 size_t
 value_dict_size(VALUE* v)
 {
@@ -833,6 +846,29 @@ value_dict_size(VALUE* v)
         return d->size;
     else
         return 0;
+}
+
+size_t
+value_dict_keys(VALUE* v, const VALUE** buffer, size_t buffer_size)
+{
+    DICT* d = value_dict_payload((VALUE*) v);
+    RBTREE* stack[RBTREE_MAX_HEIGHT];
+    int stack_size = 0;
+    RBTREE* node;
+    size_t n = 0;
+
+    if(d == NULL)
+        return 0;
+
+    stack_size = value_dict_leftmost_path(stack, d->root);
+
+    while(stack_size > 0  &&  n < buffer_size) {
+        node = stack[--stack_size];
+        buffer[n++] = &node->key;
+        stack_size += value_dict_leftmost_path(stack + stack_size, node->right);
+    }
+
+    return n;
 }
 
 VALUE*
@@ -1123,19 +1159,6 @@ value_dict_fix_after_remove(DICT* d, RBTREE** path, int path_len)
             path_len--;
         }
     }
-}
-
-static int
-value_dict_leftmost_path(RBTREE** path, RBTREE* node)
-{
-    int n = 0;
-
-    while(node != NULL) {
-        path[n++] = node;
-        node = node->left;
-    }
-
-    return n;
 }
 
 int

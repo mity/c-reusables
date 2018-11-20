@@ -749,6 +749,7 @@ test_dict_basic(void)
     VALUE* foo;
     VALUE* bar;
     VALUE* baz;
+    const VALUE* keys[8];
 
     TEST_CHECK(value_init_dict(NULL, 0) != 0);
     TEST_CHECK(value_dict_find(NULL, "foo") == NULL);
@@ -793,6 +794,11 @@ test_dict_basic(void)
     TEST_CHECK(value_dict_get(&d, "foo") == foo);
     TEST_CHECK(value_dict_get(&d, "bar") == bar);
     TEST_CHECK(value_dict_get(&d, "baz") == baz);
+
+    TEST_CHECK(value_dict_keys(&d, keys, 8) == 3);
+    TEST_CHECK(strcmp(value_string(keys[0]), "bar") == 0);
+    TEST_CHECK(strcmp(value_string(keys[1]), "baz") == 0);
+    TEST_CHECK(strcmp(value_string(keys[2]), "foo") == 0);
     value_fini(&d);
 }
 
