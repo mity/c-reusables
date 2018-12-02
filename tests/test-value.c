@@ -751,7 +751,7 @@ test_dict_basic(void)
     VALUE* baz;
     const VALUE* keys[8];
 
-    TEST_CHECK(value_init_dict(NULL, 0) != 0);
+    TEST_CHECK(value_init_dict(NULL) != 0);
     TEST_CHECK(value_dict_get(NULL, "foo") == NULL);
     TEST_CHECK(value_dict_get_or_add(NULL, "foo") == NULL);
     TEST_CHECK(value_dict_remove(NULL, "foo") != 0);
@@ -759,7 +759,7 @@ test_dict_basic(void)
     TEST_CHECK(value_dict_walk_sorted(NULL, NULL, NULL) != 0);
     value_dict_clean(NULL);
 
-    value_init_dict(&d, 0);
+    value_init_dict(&d);
     TEST_CHECK(value_type(&d) == VALUE_DICT);
     TEST_CHECK(!value_is_compatible(&d, VALUE_NULL));
     TEST_CHECK(!value_is_compatible(&d, VALUE_BOOL));
@@ -779,7 +779,7 @@ test_dict_basic(void)
     TEST_CHECK(value_dict_size(&d) == 0);
     value_fini(&d);
 
-    value_init_dict(&d, 0);
+    value_init_dict(&d);
     foo = value_dict_get_or_add(&d, "foo");
     value_init_string(foo, "foo value");
     bar = value_dict_get_or_add(&d, "bar");
@@ -795,7 +795,7 @@ test_dict_basic(void)
     TEST_CHECK(value_dict_get_or_add(&d, "bar") == bar);
     TEST_CHECK(value_dict_get_or_add(&d, "baz") == baz);
 
-    TEST_CHECK(value_dict_keys(&d, keys, 8) == 3);
+    TEST_CHECK(value_dict_keys_sorted(&d, keys, 8) == 3);
     TEST_CHECK(strcmp(value_string(keys[0]), "bar") == 0);
     TEST_CHECK(strcmp(value_string(keys[1]), "baz") == 0);
     TEST_CHECK(strcmp(value_string(keys[2]), "foo") == 0);
@@ -812,7 +812,7 @@ test_dict_big(void)
     int i;
     char key[32];
 
-    value_init_dict(&d, 0);
+    value_init_dict(&d);
     for(i = 0; i < N; i++) {
         sprintf(key, "%d", i);
         v = value_dict_get_or_add(&d, key);
@@ -841,7 +841,7 @@ test_dict_remove(void)
     int n_removed = 0;
     char key[32];
 
-    value_init_dict(&d, 0);
+    value_init_dict(&d);
     for(i = 0; i < N; i++) {
         sprintf(key, "%d", i);
         v = value_dict_get_or_add(&d, key);
@@ -899,7 +899,7 @@ test_dict_walk_ordered(void)
     int i;
     TEST_DICT_WALK_ORDERED_CTX ctx = { keys, 0 };
 
-    value_init_dict(&d, VALUE_DICT_MAINTAINORDER);
+    value_init_dict_ex(&d, NULL, VALUE_DICT_MAINTAINORDER);
     for(i = 0; i < N / 2; i++) {
         v = value_dict_get_or_add(&d, keys[i]);
         value_init_string(v, keys[i]);
@@ -920,6 +920,34 @@ test_dict_walk_ordered(void)
     value_fini(&d);
 }
 
+static int
+custom_cmp(const char* key1, size_t len1, const char* key2, size_t len2)
+{
+    if(len1 != len2)
+        return (len1 < len2 ? -1 : +1);
+    else
+        return memcmp(key1, key2, len1);
+}
+
+static void
+test_dict_custom_cmp(void)
+{
+    VALUE d;
+    VALUE* foo;
+    VALUE* bar;
+
+    value_init_dict_ex(&d, custom_cmp, 0);
+
+    foo = value_dict_add(&d, "foo");
+    value_init_string(foo, "Foo");
+
+    bar = value_dict_add(&d, "bar");
+    value_init_string(bar, "Bar");
+
+    TEST_CHECK(value_dict_size(&d) == 2);
+    TEST_CHECK(value_dict_get(&d, "foo") != NULL);
+    TEST_CHECK(value_dict_get(&d, "bar") != NULL);
+}
 
 static void
 test_path(void)
@@ -931,9 +959,9 @@ test_path(void)
     VALUE* bar1;
     VALUE* bar2;
 
-    TEST_CHECK(value_init_dict(&root, 0) == 0);
+    TEST_CHECK(value_init_dict(&root) == 0);
     foo = value_dict_get_or_add(&root, "foo");
-    TEST_CHECK(value_init_dict(foo, 0) == 0);
+    TEST_CHECK(value_init_dict(foo) == 0);
     bar = value_dict_get_or_add(foo, "bar");
     TEST_CHECK(value_init_array(bar) == 0);
     TEST_CHECK(value_array_append(bar) != NULL);
@@ -984,6 +1012,7 @@ TEST_LIST = {
     { "dict-big",           test_dict_big },
     { "dict-remove",        test_dict_remove },
     { "dict-walk-ordered",  test_dict_walk_ordered },
+    { "dict-custom-cmp",    test_dict_custom_cmp },
     { "path",               test_path },
     { 0 }
 };

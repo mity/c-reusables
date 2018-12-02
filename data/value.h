@@ -263,14 +263,27 @@ void value_array_clean(VALUE* v);
  */
 
 
-/* Flag for init_dict() asking to maintain the order in which the dictionary
+/* Flag for init_dict_ex() asking to maintain the order in which the dictionary
  * is populated and enables dict_walk_ordered().
  *
  * If used, the dictionary consumes more memory for every node.
  */
 #define VALUE_DICT_MAINTAINORDER      0x0001
 
-int value_init_dict(VALUE* v, unsigned flags);
+/* Initialize the value as a (empty) dictionary.
+ *
+ * value_init_dict_ex() allows to specify custom comparer function (may be NULL)
+ * or flags.
+ */
+int value_init_dict(VALUE* v);
+int value_init_dict_ex(VALUE* v,
+                       int (*custom_cmp_func)(const char* /*key1*/, size_t /*len1*/,
+                                              const char* /*key2*/, size_t /*len2*/),
+                       unsigned flags);
+
+/* Get flags of the dictionary.
+ */
+unsigned value_dict_flags(const VALUE* v);
 
 /* Get count of items in the dictionary.
  */
@@ -282,7 +295,8 @@ size_t value_dict_size(const VALUE* v);
  *
  * Returns count of retrieved keys.
  */
-size_t value_dict_keys(const VALUE* v, const VALUE** buffer, size_t buffer_size);
+size_t value_dict_keys_sorted(const VALUE* v, const VALUE** buffer, size_t buffer_size);
+size_t value_dict_keys_ordered(const VALUE* v, const VALUE** buffer, size_t buffer_size);
 
 /* Find an item with the given key, or return NULL of no such item exists.
  */
