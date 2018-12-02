@@ -85,7 +85,7 @@ BUFFER_INLINE__ void* buffer_data(BUFFER* buf)
         { return buf->data; }
 BUFFER_INLINE__ size_t buffer_size(BUFFER* buf)
         { return buf->size; }
-BUFFER_INLINE__ int buffer_empty(BUFFER* buf)
+BUFFER_INLINE__ int buffer_is_empty(BUFFER* buf)
         { return (buf->size == 0); }
 
 /* Contents modifiers. */
@@ -110,7 +110,7 @@ BUFFER_INLINE__ STACK* stack_alloc(void)        { return buffer_alloc(); }
 BUFFER_INLINE__ void stack_free(STACK* stack)   { buffer_free(stack); }
 
 BUFFER_INLINE__ size_t stack_size(STACK* stack) { return buffer_size(stack); }
-BUFFER_INLINE__ int stack_empty(STACK* stack)   { return buffer_empty(stack); }
+BUFFER_INLINE__ int stack_is_empty(STACK* stack)   { return buffer_is_empty(stack); }
 
 BUFFER_INLINE__ int stack_push(STACK* stack, const void* data, size_t n)
         { return buffer_append(stack, data, n); }
