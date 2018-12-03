@@ -64,12 +64,6 @@ BUFFER_INLINE__ void buffer_init(BUFFER* buf)
 BUFFER_INLINE__ void buffer_fini(BUFFER* buf)
         { free(buf->data); }
 
-/* Allocate/free buffer structure on heap.
- * buffer_alloc() is moral equivalent of malloc() + buffer_init(),
- * buffer_free() is moral equivalent if buffer_fini() + free() */
-BUFFER* buffer_alloc(void);
-void buffer_free(BUFFER* buf);
-
 /* Change capacity of the buffer. If lower then current size, the data contents
  * beyond the new buffer capacity is lost. */
 int buffer_realloc(BUFFER* buf, size_t alloc);
@@ -105,9 +99,6 @@ typedef BUFFER STACK;
 
 BUFFER_INLINE__ void stack_init(STACK* stack)   { buffer_init(stack); }
 BUFFER_INLINE__ void stack_fini(STACK* stack)   { buffer_fini(stack); }
-
-BUFFER_INLINE__ STACK* stack_alloc(void)        { return buffer_alloc(); }
-BUFFER_INLINE__ void stack_free(STACK* stack)   { buffer_free(stack); }
 
 BUFFER_INLINE__ size_t stack_size(STACK* stack) { return buffer_size(stack); }
 BUFFER_INLINE__ int stack_is_empty(STACK* stack)   { return buffer_is_empty(stack); }

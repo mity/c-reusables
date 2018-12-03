@@ -26,24 +26,6 @@
 #include "buffer.h"
 
 
-BUFFER*
-buffer_alloc(void)
-{
-    BUFFER* buf;
-
-    buf = (BUFFER*) malloc(sizeof(BUFFER));
-    if(buf != NULL)
-        buffer_init(buf);
-    return buf;
-}
-
-void
-buffer_free(BUFFER* buf)
-{
-    buffer_fini(buf);
-    free(buf);
-}
-
 int
 buffer_realloc(BUFFER* buf, size_t alloc)
 {

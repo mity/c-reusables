@@ -31,20 +31,16 @@ static void
 test_init(void)
 {
     BUFFER buf;
-    BUFFER* p_buf;
 
     buffer_init(&buf);
-    p_buf = buffer_alloc();
 
     buffer_append(&buf, "hello", 5);
-    buffer_append(p_buf, "hello", 5);
 
-    TEST_CHECK(buf.size == p_buf->size);
-    TEST_CHECK(buf.alloc == p_buf->alloc);
-    TEST_CHECK(memcmp(buf.data, p_buf->data, 5) == 0);
+    TEST_CHECK(buf.size == 5);
+    TEST_CHECK(buf.alloc >= buf.size);
+    TEST_CHECK(memcmp(buf.data, "hello", 5) == 0);
 
     buffer_fini(&buf);
-    buffer_free(p_buf);
 }
 
 static void
