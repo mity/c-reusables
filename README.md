@@ -37,7 +37,7 @@ The following rules apply:
 
  * `data/buffer.[hc]`: Simple growing buffer.
 
- * `data/lsit.h`: Intrusive doubly-linked list.
+ * `data/list.h`: Intrusive doubly-linked list.
 
  * `data/value.[hc]`: Simple value structure, capable of holding various scalar
    types of data (booleans, numeric types, strings) and collections (arrays,
