@@ -1,8 +1,6 @@
 # YAML definition for travis-ci.com continuous integration.
 # See https://docs.travis-ci.com/user/languages/c
 
-sudo: false
-
 language: c
 
 compiler:
