@@ -77,9 +77,9 @@ BUFFER_INLINE__ void* buffer_data_at(BUFFER* buf, size_t pos)
         { return (void*) (((uint8_t*)buf->data) + pos); }
 BUFFER_INLINE__ void* buffer_data(BUFFER* buf)
         { return buf->data; }
-BUFFER_INLINE__ size_t buffer_size(BUFFER* buf)
+BUFFER_INLINE__ size_t buffer_size(const BUFFER* buf)
         { return buf->size; }
-BUFFER_INLINE__ int buffer_is_empty(BUFFER* buf)
+BUFFER_INLINE__ int buffer_is_empty(const BUFFER* buf)
         { return (buf->size == 0); }
 
 /* Contents modifiers. */
