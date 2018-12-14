@@ -83,12 +83,18 @@ BUFFER_INLINE__ int buffer_is_empty(BUFFER* buf)
         { return (buf->size == 0); }
 
 /* Contents modifiers. */
+void* buffer_insert_(BUFFER* buf, size_t pos, size_t n);
+BUFFER_INLINE__ void* buffer_append_(BUFFER* buf, size_t n)
+        { return buffer_insert_(buf, buf->size, n); }
 int buffer_insert(BUFFER* buf, size_t pos, const void* data, size_t n);
 BUFFER_INLINE__ int buffer_append(BUFFER* buf, const void* data, size_t n)
         { return buffer_insert(buf, buf->size, data, n); }
 void buffer_remove(BUFFER* buf, size_t pos, size_t n);
 BUFFER_INLINE__ void buffer_clear(BUFFER* buf)
         { buffer_remove(buf, 0, buf->size); }
+
+BUFFER_INLINE__ void* buffer_acquire(BUFFER* buf)
+        { void* data = buf->data; buffer_init(buf); return data; }
 
 
 /* Sometimes, it is very useful to use the buffer as a general-purpose stack.
