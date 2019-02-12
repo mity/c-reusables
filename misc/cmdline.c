@@ -176,9 +176,9 @@ cmdline_read(const CMDLINE_OPTION* options, int argc, char** argv,
 
                     if(strncmp(badoptname, "--", 2) == 0) {
                         /* Strip any argument from the long option. */
-                        char* assignement = strchr(badoptname, '=');
-                        if(assignement != NULL) {
-                            size_t len = assignement - badoptname;
+                        char* assignment = strchr(badoptname, '=');
+                        if(assignment != NULL) {
+                            size_t len = assignment - badoptname;
                             if(len > CMDLINE_AUXBUF_SIZE)
                                 len = CMDLINE_AUXBUF_SIZE;
                             strncpy(auxbuf, badoptname, len);
