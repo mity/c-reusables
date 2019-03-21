@@ -67,7 +67,7 @@ The following rules apply:
    etc.
 
  * `misc/malloca.h`: `MALLOCA()` and `FREEA()` macros, which are a portable
-   variant of `malloca()` and `freea()` from Windows SDKs by Microsoft.
+   variant of `_malloca()` and `_freea()` from Windows SDKs by Microsoft.
    `MALLOCA()` allocates on stack if requested size below some threshold,
    for larger allocations it uses `malloc()`.
 
