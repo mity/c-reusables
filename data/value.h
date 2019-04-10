@@ -104,22 +104,25 @@ int value_is_new(const VALUE* v);
  * contain zero byte '\0', slash '/' or brackets '[' ']' because those are
  * interpreted by the function as special characters:
  *
- *  -- '/' delimits dictionary keys and array indexes.
+ *  -- '/' delimits dictionary keys (and optionally also array indexes;
+ *     paths "foo/[4]" and "foo[4]" are treated as equivalent.)
  *  -- '[' ']' enclose array indexes (for distinguishing from numbered
- *     dictionary keys).
+ *     dictionary keys). Note that negative indexes are supported here;
+ *     '[-1]' refers to the last element in the array, '[-2]' to the element
+*       before the last element etc.
  *  -- '\0' terminates the whole path (as is normal with C strings).
  *
  * Examples:
  *
  *  (1) value_path(root, "") gets directly the root.
-
+ *
  *  (2) value_path(root, "foo") gets value keyed with 'foo' if root is a
  *      dictionary having such value, or NULL otherwise.
  *
  *  (3) value_path(root, "[4]") gets value with index 4 if root is an array
  *      having so many members, or NULL otherwise.
  *
- *  (4) value_path(root, "foo/[2]/bar/baz/[3]") walks deeper and deeper and
+ *  (4) value_path(root, "foo[2]/bar/baz[3]") walks deeper and deeper and
  *      returns a value stored there assuming these all conditions are true:
  *       -- root is dictionary having the key "foo";
  *       -- that value is a nested list having the index [2];
@@ -129,6 +132,39 @@ int value_is_new(const VALUE* v);
  *      If any of those is not fulfilled, then NULL is returned.
  */
 VALUE* value_path(VALUE* root, const char* path);
+
+/* value_build_path() is similar to value_path(); but allows easy populating
+ * of value hierarchies.
+ *
+ * If all values along the path already exist, the behavior is exactly the same
+ * as value_path().
+ *
+ * But when a value corresponding to any component of the path does not exist
+ * then, instead of returning NULL, new value is added into the parent
+ * container (assuming the parent existing container has correct type as
+ * assumed by the path.)
+ *
+ * Caller may use empty "[]" to always enforce appending a new value into an
+ * array. E.g. value_build_path(root, "multiple_values/[]/name") makes sure the
+ * root contains an array under the key "multiple_values", and a new dictionary
+ * is appended at the end of the array. This new dictionary gets a new value
+ * under the key "name". Assuming the function succeeds, the caller can now be
+ * sure the "name" is initialized as VALUE_NULL because the new dictionary has
+ * been just created and added as the last element if the list.
+ *
+ * If such new value does not correspond to the last path component, the new
+ * value gets initialized as the right type so subsequent path component can
+ * be treated the same way.
+ *
+ * If the function creates the value corresponding to the last component of the
+ * path, it is initialized as VALUE_NULL and the "new flag" is set for it, so
+ * caller can test this condition with value_is_new().
+ *
+ * Returns NULL if the path cannot be resolved because any existing value
+ * has a type incompatible with the path; if creation of any value along the
+ * path fails; or if an array index is out of bounds.
+ */
+VALUE* value_build_path(VALUE* root, const char* path);
 
 
 /******************

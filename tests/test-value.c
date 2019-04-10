@@ -947,6 +947,8 @@ test_dict_custom_cmp(void)
     TEST_CHECK(value_dict_size(&d) == 2);
     TEST_CHECK(value_dict_get(&d, "foo") != NULL);
     TEST_CHECK(value_dict_get(&d, "bar") != NULL);
+
+    value_fini(&d);
 }
 
 static void
@@ -972,25 +974,123 @@ test_path(void)
     bar2 = value_array_get(bar, 2);
 
     TEST_CHECK(value_path(NULL, "") == NULL);
+    TEST_CHECK(value_path(NULL, "foo") == NULL);
     TEST_CHECK(value_path(&root, "") == &root);
     TEST_CHECK(value_path(&root, "/") == &root);
+    TEST_CHECK(value_path(&root, "////") == &root);
     TEST_CHECK(value_path(&root, "foo") == foo);
     TEST_CHECK(value_path(&root, "/foo") == foo);
     TEST_CHECK(value_path(&root, "/foo/") == foo);
     TEST_CHECK(value_path(&root, "foo/bar") == bar);
+    TEST_CHECK(value_path(&root, "//foo///bar///") == bar);
     TEST_CHECK(value_path(&root, "/foo/bar/") == bar);
     TEST_CHECK(value_path(&root, "/foo/bar/[0]") == bar0);
     TEST_CHECK(value_path(&root, "/foo/bar/[1]") == bar1);
     TEST_CHECK(value_path(&root, "/foo/bar/[2]") == bar2);
     TEST_CHECK(value_path(&root, "/foo/bar/[3]") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar/[-0]") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar/[-1]") == bar2);
+    TEST_CHECK(value_path(&root, "/foo/bar/[-2]") == bar1);
+    TEST_CHECK(value_path(&root, "/foo/bar/[-3]") == bar0);
     TEST_CHECK(value_path(&root, "/foo/bar/[]") == NULL);
     TEST_CHECK(value_path(&root, "/foo/bar/[x]") == NULL);
     TEST_CHECK(value_path(&root, "/foo/bar/0") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar[0]") == bar0);
+    TEST_CHECK(value_path(&root, "/foo/bar[1]") == bar1);
+    TEST_CHECK(value_path(&root, "/foo/bar[2]") == bar2);
+    TEST_CHECK(value_path(&root, "/foo/bar[3]") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar[-0]") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar[-1]") == bar2);
+    TEST_CHECK(value_path(&root, "/foo/bar[-2]") == bar1);
+    TEST_CHECK(value_path(&root, "/foo/bar[-3]") == bar0);
+    TEST_CHECK(value_path(&root, "/foo/bar[]") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar[x]") == NULL);
+    TEST_CHECK(value_path(&root, "/foo/bar0") == NULL);
     TEST_CHECK(value_path(&root, "/[0]") == NULL);
+    TEST_CHECK(value_path(&root, "[0]") == NULL);
     TEST_CHECK(value_path(&root, "xxx/yyy") == NULL);
     TEST_CHECK(value_path(&root, "foo/yyy") == NULL);
     TEST_CHECK(value_path(&root, "xxx/foo") == NULL);
     TEST_CHECK(value_path(&root, "xxx/bar") == NULL);
+
+    value_fini(&root);
+}
+
+static void
+test_build_path(void)
+{
+    VALUE root;
+    VALUE* foo;
+    VALUE* bar;
+    VALUE* bar0;
+    VALUE* bar1;
+    VALUE* bar2;
+
+    TEST_CHECK(value_init_dict(&root) == 0);
+    foo = value_dict_get_or_add(&root, "foo");
+    TEST_CHECK(value_init_dict(foo) == 0);
+    bar = value_dict_get_or_add(foo, "bar");
+    TEST_CHECK(value_init_array(bar) == 0);
+    TEST_CHECK(value_array_append(bar) != NULL);
+    TEST_CHECK(value_array_append(bar) != NULL);
+    TEST_CHECK(value_array_append(bar) != NULL);
+    bar0 = value_array_get(bar, 0);
+    bar1 = value_array_get(bar, 1);
+    bar2 = value_array_get(bar, 2);
+
+    TEST_CHECK(value_build_path(NULL, "") == NULL);
+    TEST_CHECK(value_build_path(NULL, "foo") == NULL);
+    TEST_CHECK(value_build_path(&root, "") == &root);
+    TEST_CHECK(value_build_path(&root, "/") == &root);
+    TEST_CHECK(value_build_path(&root, "foo") == foo);
+    TEST_CHECK(value_build_path(&root, "/foo") == foo);
+    TEST_CHECK(value_build_path(&root, "/foo/") == foo);
+    TEST_CHECK(value_build_path(&root, "foo/bar") == bar);
+    TEST_CHECK(value_build_path(&root, "/foo/bar/") == bar);
+    TEST_CHECK(value_build_path(&root, "/foo/bar/[0]") == bar0);
+    TEST_CHECK(value_build_path(&root, "/foo/bar[1]") == bar1);
+    TEST_CHECK(value_build_path(&root, "/foo/bar/[2]") == bar2);
+    TEST_CHECK(value_build_path(&root, "/foo/bar[3]") == NULL);
+    TEST_CHECK(value_build_path(&root, "/foo/bar/[-0]") == NULL);
+    TEST_CHECK(value_build_path(&root, "/foo/bar[-1]") == bar2);
+    TEST_CHECK(value_build_path(&root, "/foo/bar/[-2]") == bar1);
+    TEST_CHECK(value_build_path(&root, "/foo/bar[-3]") == bar0);
+    TEST_CHECK(value_build_path(&root, "/foo/bar/[x]") == NULL);
+    TEST_CHECK(value_build_path(&root, "/foo/bar[x]") == NULL);
+    TEST_CHECK(value_build_path(&root, "/foo/bar/0") == NULL);
+    TEST_CHECK(value_build_path(&root, "/[0]") == NULL);
+    TEST_CHECK(value_build_path(&root, "[0]") == NULL);
+
+    TEST_CHECK(value_array_size(value_path(&root, "/foo/bar")) == 3);
+    TEST_CHECK(value_is_new(value_build_path(&root, "/foo/bar/[]")));
+    TEST_CHECK(value_array_size(value_path(&root, "/foo/bar")) == 4);
+
+    TEST_CHECK(value_path(&root, "xxx") == NULL);
+    TEST_CHECK(value_path(&root, "xxx/yyy") == NULL);
+    TEST_CHECK(value_path(&root, "foo/yyy") == NULL);
+    TEST_CHECK(value_is_new(value_build_path(&root, "xxx/yyy")));
+    TEST_CHECK(value_is_new(value_build_path(&root, "foo/yyy")));
+    TEST_CHECK(value_is_new(value_build_path(&root, "xxx/foo")));
+    TEST_CHECK(value_is_new(value_build_path(&root, "xxx/bar")));
+    TEST_CHECK(value_type(value_path(&root, "xxx")) == VALUE_DICT);
+
+    TEST_CHECK(value_path(&root, "deeply-nested-list") == NULL);
+    TEST_CHECK(value_build_path(&root, "deeply-nested-list/[]/[]/[]/xxx") != NULL);
+    TEST_CHECK(value_type(value_path(&root, "deeply-nested-list")) == VALUE_ARRAY);
+    TEST_CHECK(value_type(value_path(&root, "deeply-nested-list/[0]")) == VALUE_ARRAY);
+    TEST_CHECK(value_type(value_path(&root, "deeply-nested-list/[0]/[0]")) == VALUE_ARRAY);
+    TEST_CHECK(value_type(value_path(&root, "deeply-nested-list/[0]/[0]/[0]")) == VALUE_DICT);
+    TEST_CHECK(value_is_new(value_path(&root, "deeply-nested-list/[0]/[0]/[0]/xxx")));
+    value_fini(&root);
+
+    /* Try also root as an array. */
+    TEST_CHECK(value_init_array(&root) == 0);
+    TEST_CHECK(value_build_path(&root, "[][][]") != NULL);
+    TEST_CHECK(value_type(value_path(&root, "[0]")) == VALUE_ARRAY);
+    TEST_CHECK(value_type(value_path(&root, "[0][0]")) == VALUE_ARRAY);
+    TEST_CHECK(value_is_new(value_path(&root, "[0][0][0]")));
+    TEST_CHECK(value_is_new(value_path(&root, "///[0]//[0]/[0]")));
+    value_fini(&root);
 }
 
 
@@ -1014,6 +1114,7 @@ TEST_LIST = {
     { "dict-walk-ordered",  test_dict_walk_ordered },
     { "dict-custom-cmp",    test_dict_custom_cmp },
     { "path",               test_path },
+    { "build-path",         test_build_path },
     { 0 }
 };
 
