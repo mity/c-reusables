@@ -136,9 +136,9 @@ VALUE* value_path(VALUE* root, const char* path);
  ******************/
 
 /* Note it is guaranteed that NULL does not need any explicit clean-up;
- * i.e. application may avoid calling fini().
+ * i.e. application may avoid calling value_fini().
  *
- * But it is allowed to. fini() for NULL is noop.
+ * But it is allowed to. value_fini() for VALUE_NULL is a noop.
  */
 
 
@@ -178,7 +178,7 @@ int value_init_double(VALUE* v, double d);
  * functions perform required conversions under the hood. The conversion may
  * have have the same side/limitations as C casting.
  *
- * However application may use is_compatible() to verify whether the
+ * However application may use value_is_compatible() to verify whether the
  * conversion should provide reasonable result.
  */
 int32_t value_int32(const VALUE* v);
