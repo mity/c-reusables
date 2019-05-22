@@ -111,10 +111,15 @@ BUFFER_INLINE__ int stack_is_empty(STACK* stack)   { return buffer_is_empty(stac
 
 BUFFER_INLINE__ int stack_push(STACK* stack, const void* data, size_t n)
         { return buffer_append(stack, data, n); }
-BUFFER_INLINE__ void stack_peek(STACK* stack, void* addr, size_t n)
+BUFFER_INLINE__ void* stack_peek(STACK* stack, size_t n)
+        { return buffer_data_at(stack, stack_size(stack) - n); }
+BUFFER_INLINE__ void* stack_pop(STACK* stack, size_t n)
+        { return buffer_data_at(stack, stack_size(stack) - n);
+          buffer_remove(stack, stack_size(stack) - n, n); }
+BUFFER_INLINE__ void stack_peek_copy(STACK* stack, void* addr, size_t n)
         { memcpy(addr, buffer_data_at(stack, stack_size(stack) - n), n); }
-BUFFER_INLINE__ void stack_pop(STACK* stack, void* addr, size_t n)
-        { stack_peek(stack, addr, n);
+BUFFER_INLINE__ void stack_pop_copy(STACK* stack, void* addr, size_t n)
+        { stack_peek_copy(stack, addr, n);
           buffer_remove(stack, stack_size(stack) - n, n); }
 
 BUFFER_INLINE__ int stack_push_int8(STACK* stack, int8_t i8)
@@ -137,42 +142,42 @@ BUFFER_INLINE__ int stack_push_ptr(STACK* stack, void* ptr)
         { return stack_push(stack, (void*) &ptr, sizeof(void*)); }
 
 BUFFER_INLINE__ int8_t stack_peek_int8(STACK* stack)
-        { int8_t ret; stack_peek(stack, (void*) &ret, sizeof(int8_t)); return ret; }
+        { int8_t ret; stack_peek_copy(stack, (void*) &ret, sizeof(int8_t)); return ret; }
 BUFFER_INLINE__ uint8_t stack_peek_uint8(STACK* stack)
-        { uint8_t ret; stack_peek(stack, (void*) &ret, sizeof(uint8_t)); return ret; }
+        { uint8_t ret; stack_peek_copy(stack, (void*) &ret, sizeof(uint8_t)); return ret; }
 BUFFER_INLINE__ int16_t stack_peek_int16(STACK* stack)
-        { int16_t ret; stack_peek(stack, (void*) &ret, sizeof(int16_t)); return ret; }
+        { int16_t ret; stack_peek_copy(stack, (void*) &ret, sizeof(int16_t)); return ret; }
 BUFFER_INLINE__ uint16_t stack_peek_uint16(STACK* stack)
-        { uint16_t ret; stack_peek(stack, (void*) &ret, sizeof(uint16_t)); return ret; }
+        { uint16_t ret; stack_peek_copy(stack, (void*) &ret, sizeof(uint16_t)); return ret; }
 BUFFER_INLINE__ int32_t stack_peek_int32(STACK* stack)
-        { int32_t ret; stack_peek(stack, (void*) &ret, sizeof(int32_t)); return ret; }
+        { int32_t ret; stack_peek_copy(stack, (void*) &ret, sizeof(int32_t)); return ret; }
 BUFFER_INLINE__ uint32_t stack_peek_uint32(STACK* stack)
-        { uint32_t ret; stack_peek(stack, (void*) &ret, sizeof(uint32_t)); return ret; }
+        { uint32_t ret; stack_peek_copy(stack, (void*) &ret, sizeof(uint32_t)); return ret; }
 BUFFER_INLINE__ int64_t stack_peek_int64(STACK* stack)
-        { int64_t ret; stack_peek(stack, (void*) &ret, sizeof(int64_t)); return ret; }
+        { int64_t ret; stack_peek_copy(stack, (void*) &ret, sizeof(int64_t)); return ret; }
 BUFFER_INLINE__ uint64_t stack_peek_uint64(STACK* stack)
-        { uint64_t ret; stack_peek(stack, (void*) &ret, sizeof(uint64_t)); return ret; }
+        { uint64_t ret; stack_peek_copy(stack, (void*) &ret, sizeof(uint64_t)); return ret; }
 BUFFER_INLINE__ void* stack_peek_ptr(STACK* stack)
-        { void* ret; stack_peek(stack, (void*) &ret, sizeof(void*)); return ret; }
+        { void* ret; stack_peek_copy(stack, (void*) &ret, sizeof(void*)); return ret; }
 
 BUFFER_INLINE__ int8_t stack_pop_int8(STACK* stack)
-        { int8_t ret; stack_pop(stack, (void*) &ret, sizeof(int8_t)); return ret; }
+        { int8_t ret; stack_pop_copy(stack, (void*) &ret, sizeof(int8_t)); return ret; }
 BUFFER_INLINE__ uint8_t stack_pop_uint8(STACK* stack)
-        { uint8_t ret; stack_pop(stack, (void*) &ret, sizeof(uint8_t)); return ret; }
+        { uint8_t ret; stack_pop_copy(stack, (void*) &ret, sizeof(uint8_t)); return ret; }
 BUFFER_INLINE__ int16_t stack_pop_int16(STACK* stack)
-        { int16_t ret; stack_pop(stack, (void*) &ret, sizeof(int16_t)); return ret; }
+        { int16_t ret; stack_pop_copy(stack, (void*) &ret, sizeof(int16_t)); return ret; }
 BUFFER_INLINE__ uint16_t stack_pop_uint16(STACK* stack)
-        { uint16_t ret; stack_pop(stack, (void*) &ret, sizeof(uint16_t)); return ret; }
+        { uint16_t ret; stack_pop_copy(stack, (void*) &ret, sizeof(uint16_t)); return ret; }
 BUFFER_INLINE__ int32_t stack_pop_int32(STACK* stack)
-        { int32_t ret; stack_pop(stack, (void*) &ret, sizeof(int32_t)); return ret; }
+        { int32_t ret; stack_pop_copy(stack, (void*) &ret, sizeof(int32_t)); return ret; }
 BUFFER_INLINE__ uint32_t stack_pop_uint32(STACK* stack)
-        { uint32_t ret; stack_pop(stack, (void*) &ret, sizeof(uint32_t)); return ret; }
+        { uint32_t ret; stack_pop_copy(stack, (void*) &ret, sizeof(uint32_t)); return ret; }
 BUFFER_INLINE__ int64_t stack_pop_int64(STACK* stack)
-        { int64_t ret; stack_pop(stack, (void*) &ret, sizeof(int64_t)); return ret; }
+        { int64_t ret; stack_pop_copy(stack, (void*) &ret, sizeof(int64_t)); return ret; }
 BUFFER_INLINE__ uint64_t stack_pop_uint64(STACK* stack)
-        { uint64_t ret; stack_pop(stack, (void*) &ret, sizeof(uint64_t)); return ret; }
+        { uint64_t ret; stack_pop_copy(stack, (void*) &ret, sizeof(uint64_t)); return ret; }
 BUFFER_INLINE__ void* stack_pop_ptr(STACK* stack)
-        { void* ret; stack_pop(stack, (void*) &ret, sizeof(void*)); return ret; }
+        { void* ret; stack_pop_copy(stack, (void*) &ret, sizeof(void*)); return ret; }
 
 
 #ifdef __cplusplus
