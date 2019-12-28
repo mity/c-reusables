@@ -60,7 +60,7 @@ buffer_shrink(BUFFER* buf)
 }
 
 void*
-buffer_insert_(BUFFER* buf, size_t pos, size_t n)
+buffer_insert(BUFFER* buf, size_t pos, size_t n)
 {
     if(buf->size + n > buf->alloc) {
         if(buffer_realloc(buf, (buf->size + n) * 2) != 0)
@@ -75,11 +75,11 @@ buffer_insert_(BUFFER* buf, size_t pos, size_t n)
 }
 
 int
-buffer_insert(BUFFER* buf, size_t pos, const void* data, size_t n)
+buffer_insert_copy(BUFFER* buf, size_t pos, const void* data, size_t n)
 {
     void* ptr;
 
-    ptr = buffer_insert_(buf, pos, n);
+    ptr = buffer_insert(buf, pos, n);
     if(ptr == NULL)
         return -1;
 
