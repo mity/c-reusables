@@ -63,7 +63,7 @@ extern "C" {
  * the LIST_NODE structure. To get a pointer to the enclosing application
  * specific data structure, use the macro LIST_NODE.
  *
- * Note that the list use the common little trick and does not use NULL as
+ * Note that the list uses the common little trick and does not use NULL as
  * an end-of-list sentinel. Instead the first and last nodes point to the
  * structure representing the list as a whole. This simplifies many operations
  * because it mitigates the need for branches.
@@ -81,7 +81,7 @@ extern "C" {
  *    // ...
  * };
  *
- * for(LIST_NODE* node = list_head(list); npde != list_end(list); node = list_next(node)) {
+ * for(LIST_NODE* node = list_head(list); node != list_end(list); node = list_next(node)) {
  *     struct MyStruct* s = LIST_DATA(node, struct MyStruct, list_node);
  *
  *     // ...
