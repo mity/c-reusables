@@ -52,7 +52,7 @@ extern "C" {
 #endif
 
 
-/* This header implements simple intrusive doubly-linked list.
+/* This header implements simple intrusive doubly linked list.
  *
  * The word intrusive means our LIST_NODE structure does not hold any data
  * on its own. Instead, you are supposed to embed LIST_NODE in your structure.
@@ -69,22 +69,35 @@ extern "C" {
  * because it mitigates the need for branches.
  *
  * The cost of that trick is the caller may not test an end condition with
- * NULL. For sake of simplicity we provide the function list_end(), which
- * can be used the same way as e.g. std::vector::end() in C++.
+ * NULL. For the sake of simplicity we provide the function list_end(), which
+ * can be used similarly as std::vector::end() in C++ (both in forward as well
+ * as backward iteration).
  *
  * Hence, the typical iteration over the list may look like this:
  *
  * ````
- * struct MyStruct {
- *    // ...
+ * typedef struct MyStruct {
+ *    ...   // Some data
+ *
+ *    // The embedded list node structure:
  *    LIST_NODE list_node;
- *    // ...
- * };
  *
- * for(LIST_NODE* node = list_head(list); node != list_end(list); node = list_next(node)) {
- *     struct MyStruct* s = LIST_DATA(node, struct MyStruct, list_node);
+ *    ...   // Some more data
+ * } MyStruct;
  *
- *     // ...
+ *
+ * static void
+ * walk_my_list(LIST* list)
+ * {
+ *     LIST_NODE* node;
+ *     MyStruct* data_payload;
+ *
+ *     for(node = list_head(list); node != list_end(list); node = list_next(node)) {
+ *         // Retrieve the data pay load from the node:
+ *         data_payload = LIST_DATA(node, MyStruct, list_node);
+ *
+ *         ...   // Process the data payload as desired.
+ *     }
  * }
  * ````
  */
@@ -109,13 +122,19 @@ typedef LIST_NODE LIST;
                 ((type*)((char*)(node_ptr) - LIST_OFFSETOF__(type, member)))
 
 
+/* The list has to be initialized before it is used by any other function.
+ */
 LIST_INLINE__ void list_init(LIST* list)
         { list->p = list->n = list; }
+
+
+/* Check whether the list is empty or not.
+ */
 LIST_INLINE__ int list_is_empty(const LIST* list)
         { return (list->p == list); }
 
 
-/* Iterators.
+/* Iterating the list.
  */
 LIST_INLINE__ LIST_NODE* list_head(const LIST* list)        { return list->n; }
 LIST_INLINE__ LIST_NODE* list_tail(const LIST* list)        { return list->p; }
@@ -123,7 +142,7 @@ LIST_INLINE__ LIST_NODE* list_prev(const LIST_NODE* node)   { return node->p; }
 LIST_INLINE__ LIST_NODE* list_next(const LIST_NODE* node)   { return node->n; }
 LIST_INLINE__ const LIST_NODE* list_end(const LIST* list)   { return list; }
 
-/* Adding node into the list.
+/* Add the given node into the list.
  *
  * Note that any node can be only in one list at any given time. If you
  * attempt to add the node into multiple lists (or multiple times into the
@@ -138,7 +157,7 @@ LIST_INLINE__ void list_insert_after(LIST_NODE* node_where, LIST_NODE* node)
 LIST_INLINE__ void list_insert_before(LIST_NODE* node_where, LIST_NODE* node)
         { node->p = node_where->p; node->n = node_where; node->p->n = node; node->n->p = node; }
 
-/* Removes the given node from the list.
+/* Disconnect the given node from its list.
  */
 LIST_INLINE__ void list_remove(LIST_NODE* node)
         { node->p->n = node->n; node->n->p = node->p; }
