@@ -61,7 +61,8 @@ extern "C" {
  *
  * To manipulate or query the list, the nodes are represented by pointer to
  * the LIST_NODE structure. To get a pointer to the enclosing application
- * specific data structure, use the macro LIST_NODE.
+ * specific data payload structure, use the macro LIST_DATA (which is just the
+ * the typical "container_of()" macro implementation).
  *
  * Note that the list uses the common little trick and does not use NULL as
  * an end-of-list sentinel. Instead the first and last nodes point to the
