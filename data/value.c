@@ -1120,7 +1120,8 @@ value_dict_add_(VALUE* v, const char* key, size_t key_len)
     return (value_is_new(res) ? res : NULL);
 }
 
-VALUE* value_dict_add(VALUE* v, const char* key)
+VALUE*
+value_dict_add(VALUE* v, const char* key)
 {
     return value_dict_add_(v, key, strlen(key));
 }
