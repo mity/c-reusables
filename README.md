@@ -39,6 +39,8 @@ The following rules apply:
 
  * `data/list.h`: Intrusive doubly-linked list.
 
+ * `data/rbtree.[hc]`: Intrusive red-black tree.
+
  * `data/value.[hc]`: Simple value structure, capable of holding various scalar
    types of data (booleans, numeric types, strings) and collections (arrays,
    dictionaries) of such data. It allows to build structured data in run-time;
