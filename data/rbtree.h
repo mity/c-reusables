@@ -132,30 +132,63 @@ typedef int (*RBTREE_CMP_FUNC)(const RBTREE_NODE*, const RBTREE_NODE*);
 
 
 /* Macro for getting pointer to the structure holding the rbtree node data.
+ *
+ * (If you use the RBTREE_NODE as the first member of your structure, you
+ * use just a cast instead.)
  */
 #define RBTREE_DATA(node_ptr, type, member)     \
                 ((type*)((char*)(node_ptr) - RBTREE_OFFSETOF__(type, member)))
 
 
 /* The tree has to be initialized before it is used by any other function.
- *
- * Note there is no explicit cleanup counterpart: The caller is responsible
- * to eventually remove all nodes manually with rbtree_remove().
- *
- * Alternatively, the final clean-up can be done by walking over them via
- * rbtree_first_node() and rbtree_next_node() functions, destructing all the
- * nodes and then by re-initializing the tree (i.e. setting its root to NULL)
- * for a potential re-use.
- *
- * (For the final clean-up the later is generally more effective then calling
- * rbtree_remove() for every node because it avoids any re-balancing of the
- * tree.)
  */
 RBTREE_INLINE__ void rbtree_init(RBTREE* tree)
         { tree->root = NULL; }
 
 #define RBTREE_INITIALIZER      { NULL }
 
+
+/* Cleaning a (non-empty) tree can be a more complex operation. Usually, caller
+ * needs to release some resources associated with each node (e.g. to free the
+ * data structure).
+ *
+ * We provide these specialized function for iterating over the nodes in order
+ * to destroy them.
+ *
+ * ```
+ * while(1) {
+ *     RBTREE_NODE* node = rbtree_fini_step(tree);
+ *     if(node == NULL)
+ *         break;
+ *
+ *     // Release the per-node resources:
+ *     free(RBTREE_DATA(node, MyStruct, the_node_member_name);
+ * }
+ *
+ * ```
+ *
+ * Note that once the operation starts, the tree must not be used anymore for
+ * anything unless it is complete as its internal state gets broken for
+ * any other purpose then finishing the clean-up. After the clean-up is
+ * completely done, you get a valid empty tree.
+ *
+ * The function is actually just a specialized light-weight iteration over all
+ * nodes, ripping them one by one out from the tree, without any re-balancing.
+ *
+ * It does not release any resources on its own. (Our implementation does
+ * not allocate any at the first place. We only connect the nodes together or
+ * as here, disconnect them).
+ *
+ * I.e., if you are able kill all the nodes more effectively by any other means
+ * without iterating over them (for example because all the nodes live in a
+ * single memory buffer, which can be freed at once) then you do not need to
+ * use this function at all: Instead, simply free the buffer.
+ *
+ * (Compatibility note: You should not rely on any particular order when using
+ * this function. If we find more efficient algorithm for the given purpose,
+ * future versions may present the nodes in a different order.)
+ */
+RBTREE_NODE* rbtree_fini_step(RBTREE* tree);
 
 /* The tree has to be initialized before it is used by any other function.
  */
@@ -170,63 +203,77 @@ RBTREE_INLINE__ int rbtree_is_empty(const RBTREE* tree)
  */
 int rbtree_insert(RBTREE* tree, RBTREE_NODE* node, RBTREE_CMP_FUNC cmp_func);
 
-
 /* Remove a node equal to the key (as defined by the comparator function).
  *
  * Returns pointer to the node disconnected from the tree (so that caller can
  * e.g. to destroy it), or NULL if no such item has been found in the tree.
  */
-RBTREE_NODE* rbtree_remove(RBTREE* tree, RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func);
-
+RBTREE_NODE* rbtree_remove(RBTREE* tree, const RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func);
 
 /* Find a node equal to the key (as defined by the comparator function).
  *
  * Returns pointer to the found node or NULL if no such node has been found in
  * the tree.
  */
-RBTREE_NODE* rbtree_lookup(RBTREE* tree, RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func);
+RBTREE_NODE* rbtree_lookup(RBTREE* tree, const RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func);
 
 
-/* Functions for walking over all nodes in the tree. After the last node in the
- * tree has been visited, the functions return NULL.
+/* Walking over all nodes in the tree. When reaching end of the iteration, the
+ * functions return NULL.
  *
- * Typical walking over the complete tree is implemented as follows:
+ * Walking over the complete tree can be implemented as follows:
  *
  * ```
  * static void walk_over_my_tree(RBTREE* tree)
  * {
- *     RBTREE_WALK walk;
+ *     RBTREE_CURSOR cur;
  *     RBTREE* node;
  *
- *     for(node = rbtree_first_node(tree, &walk);
+ *     for(node = rbtree_head(tree, &cur);
  *         node != NULL;
- *         node = rbtree_next_node(tree, &walk))
+ *         node = rbtree_next(&cur))
  *     {
  *         ...
  *     }
  * }
  * ```
  *
- * The nodes are visited in the order as defined by the comparator function
- * used during construction of the tree.
- *
- * Note the walking is safe in respect to a final tree cleanup. I.e. you may
- * destruct the node which is currently being visited and then still safely
- * call rbtree_next_node().
- *
- * However you must not modify the tree by any other means during the walk.
+ * However note any cursor becomes invalid and must not be used anymore when
+ * any nodes are added into the tree or removed from it.
  */
-typedef struct RBTREE_WALK {
+typedef struct RBTREE_CURSOR {
     /* (2 * 8 * sizeof(void*)) is good enough to handle RB-trees of _any_ size.
      * Consider there cannot be more then 2^(8*sizeof(void*)) nodes in the
      * process memory and the longest root<-->leaf path in any RB-tree cannot
      * be longer then twice the shortest one. */
     RBTREE_NODE* stack[2 * 8 * sizeof(void*)];
     unsigned n;
-} RBTREE_WALK;
+} RBTREE_CURSOR;
 
-RBTREE_NODE* rbtree_first_node(RBTREE* tree, RBTREE_WALK* walk);
-RBTREE_NODE* rbtree_next_node(RBTREE* tree, RBTREE_WALK* walk);
+/* Initializer for a cursor pointing to nowhere. */
+#define RBTREE_CURSOR_INITIALIZER       { { 0 }, 0 }
+
+
+/* This is similar to rbtree_lookup() but it also initializes the cursor to the
+ * corresponding position, so caller may navigate from the node to other ones
+ * via the rbtree_prev() and/or rbtree_next().
+ */
+RBTREE_NODE* rbtree_lookup_ex(RBTREE* tree, const RBTREE_NODE* key,
+                              RBTREE_CMP_FUNC cmp_func, RBTREE_CURSOR* cur);
+
+/* Get the node corresponding to the current position of the cursor; or NULL.
+ */
+RBTREE_NODE* rbtree_current(RBTREE_CURSOR* cur);
+
+/* The functions rbtree_head() and rbtree_tail() retrieve the first or last
+ * node in the tree, the functions rbtree_next() and rbtree_prev() move to
+ * the next or the previous node (in the order as defined by the comparator
+ * function used during construction of the tree).
+ */
+RBTREE_NODE* rbtree_head(RBTREE* tree, RBTREE_CURSOR* cur);
+RBTREE_NODE* rbtree_tail(RBTREE* tree, RBTREE_CURSOR* cur);
+RBTREE_NODE* rbtree_next(RBTREE_CURSOR* cur);
+RBTREE_NODE* rbtree_prev(RBTREE_CURSOR* cur);
 
 
 #ifdef __cplusplus

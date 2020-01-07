@@ -82,19 +82,13 @@ destroy_val(VAL* val)
 static void
 clear_tree(RBTREE* tree)
 {
-    RBTREE_WALK walk;
     RBTREE_NODE* node;
-
-    for(node = rbtree_first_node(tree, &walk);
-        node != NULL;
-        node = rbtree_next_node(tree, &walk))
-    {
-        VAL* val = RBTREE_DATA(node, VAL, the_node);
-        destroy_val(val);
+    while(1) {
+        node = rbtree_fini_step(tree);
+        if(node == NULL)
+            break;
+        free(RBTREE_DATA(node, VAL, the_node));
     }
-
-    /* Re-init for potential reuse. */
-    rbtree_init(tree);
 }
 
 
@@ -113,6 +107,43 @@ test_empty(void)
     TEST_CHECK(rbtree_verify(&tree) == 0);
     TEST_CHECK(!rbtree_is_empty(&tree));
     clear_tree(&tree);
+    TEST_CHECK(rbtree_is_empty(&tree));
+}
+
+static void
+test_fini(void)
+{
+    RBTREE tree = RBTREE_INITIALIZER;
+    RBTREE_NODE* node;
+    VAL* val;
+    int i;
+    char visit_flag[100] = { 0 };
+
+    for(i = 0; i < 100; i++)
+        TEST_CHECK(rbtree_insert(&tree, make_val(i), val_cmp) == 0);
+    TEST_CHECK(rbtree_verify(&tree) == 0);
+
+    /* Verify rbtree_fini_step() visits exactly once every single node;
+     * without assuming any particular order. */
+    while(1) {
+        node = rbtree_fini_step(&tree);
+        if(node == NULL)
+            break;
+
+        val = RBTREE_DATA(node, VAL, the_node);
+        if(!TEST_CHECK(0 <= val->x  &&  val->x < 100))
+            continue;
+
+        TEST_CHECK(visit_flag[val->x] == 0);
+        visit_flag[val->x] = 1;
+
+        destroy_val(val);
+    }
+    for(i = 0; i < 100; i++)
+        TEST_CHECK(visit_flag[i] != 0);
+
+    /* Verify the tree is in a good shape for reuse. */
+    TEST_CHECK(rbtree_verify(&tree) == 0);
     TEST_CHECK(rbtree_is_empty(&tree));
 }
 
@@ -212,7 +243,7 @@ test_remove(void)
 }
 
 static void
-test_walk(void)
+test_walk_forward(void)
 {
     static const struct {
         const char* name;
@@ -226,11 +257,12 @@ test_walk(void)
     RBTREE tree = RBTREE_INITIALIZER;
     int vec, i;
     VAL* val;
+    VAL key;
 
     for(vec = 0; vec < sizeof(vectors) / sizeof(vectors[0]); vec++) {
         const char* name = vectors[vec].name;
         const int* values = vectors[vec].values;
-        RBTREE_WALK walk;
+        RBTREE_CURSOR cur;
         RBTREE_NODE* node;
 
         TEST_CASE(name);
@@ -239,25 +271,115 @@ test_walk(void)
             TEST_CHECK(rbtree_insert(&tree, make_val(values[i]), val_cmp) == 0);
         TEST_CHECK(rbtree_verify(&tree) == 0);
 
-        /* Verify the walk visits all the nodes and that it happens in the
+        /* Verify the cur visits all the nodes and that it happens in the
          * right order. */
-        for(node = rbtree_first_node(&tree, &walk), i = 1;
+        for(node = rbtree_head(&tree, &cur), i = 1;
             node != NULL;
-            node = rbtree_next_node(&tree, &walk), i++)
+            node = rbtree_next(&cur), i++)
         {
             val = RBTREE_DATA(node, VAL, the_node);
             TEST_CHECK(val->x == i);
         }
 
+        /* Verify any other attempt to go forward still returns NULL. */
+        TEST_CHECK(rbtree_next(&cur) == NULL);
+
+        /* Verify we still point to the last node and user can walk backward again. */
+        key.x = 15;
+        TEST_CHECK(rbtree_current(&cur) == rbtree_lookup(&tree, &key.the_node, val_cmp));
+        key.x = 14;
+        TEST_CHECK(rbtree_prev(&cur) == rbtree_lookup(&tree, &key.the_node, val_cmp));
+
         clear_tree(&tree);
     }
 }
 
+static void
+test_walk_backward(void)
+{
+    static const struct {
+        const char* name;
+        int values[15];
+    } vectors[] = {
+        { "Ascending order",    { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 } },
+        { "Descending order",   { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 } },
+        { "Randomized order",   { 8, 1, 12, 6, 4, 14, 11, 9, 10, 15, 2, 13, 3, 5, 7 } }
+    };
+
+    RBTREE tree = RBTREE_INITIALIZER;
+    int vec, i;
+    VAL* val;
+    VAL key;
+
+    for(vec = 0; vec < sizeof(vectors) / sizeof(vectors[0]); vec++) {
+        const char* name = vectors[vec].name;
+        const int* values = vectors[vec].values;
+        RBTREE_CURSOR cur;
+        RBTREE_NODE* node;
+
+        TEST_CASE(name);
+
+        for(i = 0; i < 15; i++)
+            TEST_CHECK(rbtree_insert(&tree, make_val(values[i]), val_cmp) == 0);
+        TEST_CHECK(rbtree_verify(&tree) == 0);
+
+        /* Verify the cur visits all the nodes and that it happens in the
+         * right order. */
+        for(node = rbtree_tail(&tree, &cur), i = 15;
+            node != NULL;
+            node = rbtree_prev(&cur), i--)
+        {
+            val = RBTREE_DATA(node, VAL, the_node);
+            TEST_CHECK(val->x == i);
+        }
+
+        /* Verify any other attempt to go forward still returns NULL. */
+        TEST_CHECK(rbtree_prev(&cur) == NULL);
+
+        /* Verify we still point to the first node and user can walk forward again. */
+        key.x = 1;
+        TEST_CHECK(rbtree_current(&cur) == rbtree_lookup(&tree, &key.the_node, val_cmp));
+        key.x = 2;
+        TEST_CHECK(rbtree_next(&cur) == rbtree_lookup(&tree, &key.the_node, val_cmp));
+
+        clear_tree(&tree);
+    }
+}
+
+static void
+test_lookup_ex(void)
+{
+    RBTREE tree = RBTREE_INITIALIZER;
+    RBTREE_CURSOR cur;
+    RBTREE_NODE* node;
+    VAL key;
+    int i;
+
+    for(i = 0; i < 100; i++)
+        TEST_CHECK(rbtree_insert(&tree, make_val(i), val_cmp) == 0);
+    TEST_CHECK(rbtree_verify(&tree) == 0);
+
+    /* Verify that the return value and cursor are set consistently. */
+    key.x = 42;
+    node = rbtree_lookup_ex(&tree, &key.the_node, val_cmp, &cur);
+    TEST_CHECK(node != NULL  &&  rbtree_current(&cur) == node);
+
+    /* Ditto for non-existent node. */
+    key.x = 0xbeef;
+    TEST_CHECK(rbtree_lookup_ex(&tree, &key.the_node, val_cmp, &cur) == NULL);
+    TEST_CHECK(rbtree_current(&cur) == NULL);
+
+    clear_tree(&tree);
+}
+
 
 TEST_LIST = {
-    { "empty",          test_empty },
-    { "insert_lookup",  test_insert_lookup },
-    { "remove",         test_remove },
-    { "walk",           test_walk },
+    { "empty",              test_empty },
+    { "fini",               test_fini },
+    { "insert-and-lookup",  test_insert_lookup },
+    { "remove",             test_remove },
+    { "walk-forward",       test_walk_forward },
+    { "walk-backward",      test_walk_backward },
+    { "lookup-ex",          test_lookup_ex },
     { NULL, NULL }
 };

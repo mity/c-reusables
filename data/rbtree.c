@@ -45,7 +45,7 @@
 #define SET_RIGHT(node, ptr)    do { (node)->r = (ptr); } while(0)
 
 
-typedef RBTREE_WALK RBTREE_PATH;
+typedef RBTREE_CURSOR RBTREE_PATH;
 
 
 /* Helper tree "rotation" operations, used as a primitives for re-balancing
@@ -88,8 +88,6 @@ rbtree_rotate_right(RBTREE* tree, RBTREE_NODE* parent, RBTREE_NODE* node)
     }
 }
 
-/* Add the nodes through the left pointer into the path, starting at the
- * given node. */
 static void
 rbtree_leftmost_path(RBTREE_NODE* node, RBTREE_PATH* path)
 {
@@ -97,6 +95,39 @@ rbtree_leftmost_path(RBTREE_NODE* node, RBTREE_PATH* path)
         path->stack[path->n++] = node;
         node = LEFT(node);
     }
+}
+
+static void
+rbtree_rightmost_path(RBTREE_NODE* node, RBTREE_PATH* path)
+{
+    while(node != NULL) {
+        path->stack[path->n++] = node;
+        node = RIGHT(node);
+    }
+}
+
+
+RBTREE_NODE*
+rbtree_fini_step(RBTREE* tree)
+{
+    RBTREE_NODE** pointer_down_to_node = &tree->root;
+    RBTREE_NODE* node = tree->root;
+
+    if(node != NULL) {
+        /* Go down as far as possible through left children. */
+        while(LEFT(node) != NULL) {
+            pointer_down_to_node = &node->lc;
+            node = LEFT(node);
+        }
+
+        /* The node now can have at most one child (the right one). I.e. we can
+         * rip out the current node and "upgrade" the right subtree (or NULL)
+         * one level up into this node's place. This should be cheaper then
+         * iterating to some leaf in the right subtree. */
+        *pointer_down_to_node = RIGHT(node);
+    }
+
+    return node;
 }
 
 /* Extended lookup which searches the tree down from the given node and appends
@@ -117,7 +148,8 @@ rbtree_leftmost_path(RBTREE_NODE* node, RBTREE_PATH* path)
  * or he can avoid calling this function altogether (if tree->root == NULL).
  */
 static int
-rbtree_lookup_path(RBTREE_NODE* node, RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func, RBTREE_PATH* path)
+rbtree_lookup_path(RBTREE_NODE* node, const RBTREE_NODE* key,
+                   RBTREE_CMP_FUNC cmp_func, RBTREE_PATH* path)
 {
     int cmp = 0;
 
@@ -331,7 +363,7 @@ rbtree_remove_fixup(RBTREE* tree, RBTREE_PATH* path)
 }
 
 RBTREE_NODE*
-rbtree_remove(RBTREE* tree, RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func)
+rbtree_remove(RBTREE* tree, const RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func)
 {
     RBTREE_PATH path;
     RBTREE_NODE* node;
@@ -432,7 +464,7 @@ rbtree_remove(RBTREE* tree, RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func)
 }
 
 RBTREE_NODE*
-rbtree_lookup(RBTREE* tree, RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func)
+rbtree_lookup(RBTREE* tree, const RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func)
 {
     RBTREE_NODE* node = tree->root;
     int cmp;
@@ -451,36 +483,91 @@ rbtree_lookup(RBTREE* tree, RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func)
     return node;
 }
 
-
 RBTREE_NODE*
-rbtree_first_node(RBTREE* tree, RBTREE_WALK* walk)
+rbtree_lookup_ex(RBTREE* tree, const RBTREE_NODE* key,
+                 RBTREE_CMP_FUNC cmp_func, RBTREE_CURSOR* cur)
 {
-    /* The minimal value is the left-most node. */
-    walk->n = 0;
-    rbtree_leftmost_path(tree->root, walk);
+    int cmp;
 
-    return rbtree_next_node(tree, walk);
-}
+    cur->n = 0;
+    cmp = rbtree_lookup_path(tree->root, key, cmp_func, cur);
 
-RBTREE_NODE*
-rbtree_next_node(RBTREE* tree, RBTREE_WALK* walk)
-{
-    RBTREE_NODE* node;
-
-    if(walk->n > 0) {
-        /* Take the minimal unresolved value (at the end of the current path)
-         * and append the leftmost path of its right child for the next call. */
-        node = walk->stack[walk->n - 1];
-        walk->n--;
-        rbtree_leftmost_path(RIGHT(node), walk);
-    } else {
-        /* Nothing more to process. */
-        node = NULL;
+    if(cur->n == 0  ||  cmp != 0) {
+        cur->n = 0; /* No node equal to the key: Reset the cursor. */
+        return NULL;
     }
 
-    return node;
+    return cur->stack[cur->n - 1];
 }
 
+RBTREE_NODE*
+rbtree_current(RBTREE_CURSOR* cur)
+{
+    return (cur->n > 0) ? cur->stack[cur->n - 1] : NULL;
+}
+
+
+RBTREE_NODE*
+rbtree_head(RBTREE* tree, RBTREE_CURSOR* cur)
+{
+    cur->n = 0;
+    rbtree_leftmost_path(tree->root, cur);
+    return (cur->n > 0) ? cur->stack[cur->n - 1] : NULL;
+}
+
+RBTREE_NODE*
+rbtree_tail(RBTREE* tree, RBTREE_CURSOR* cur)
+{
+    cur->n = 0;
+    rbtree_rightmost_path(tree->root, cur);
+    return (cur->n > 0) ? cur->stack[cur->n - 1] : NULL;
+}
+
+RBTREE_NODE*
+rbtree_next(RBTREE_CURSOR* cur)
+{
+    if(cur->n > 0) {
+        if(RIGHT(cur->stack[cur->n - 1]) != NULL) {
+            rbtree_leftmost_path(RIGHT(cur->stack[cur->n - 1]), cur);
+        } else {
+            /* Operate with temp. copy of n. This is to keep the cursor point
+             * to the last node even if we have reached the maximal/last value. */
+            unsigned n = cur->n;
+
+            while(n > 1  &&  cur->stack[n - 1] == RIGHT(cur->stack[n - 2]))
+                n--;
+            n--;
+
+            if(n == 0)
+                return NULL;
+            cur->n = n;
+        }
+    }
+    return (cur->n > 0) ? cur->stack[cur->n - 1] : NULL;
+}
+
+RBTREE_NODE*
+rbtree_prev(RBTREE_CURSOR* cur)
+{
+    if(cur->n > 0) {
+        if(LEFT(cur->stack[cur->n - 1]) != NULL) {
+            rbtree_rightmost_path(LEFT(cur->stack[cur->n - 1]), cur);
+        } else {
+            /* Operate with temp. copy of n. This is to keep the cursor point
+             * to the first node even if we have reached the minimal/first value. */
+            unsigned n = cur->n;
+
+            while(n > 1  &&  cur->stack[n - 1] == LEFT(cur->stack[n - 2]))
+                n--;
+            n--;
+
+            if(n == 0)
+                return NULL;
+            cur->n = n;
+        }
+    }
+    return (cur->n > 0) ? cur->stack[cur->n - 1] : NULL;
+}
 
 
 #ifdef CRE_TEST
