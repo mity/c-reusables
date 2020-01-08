@@ -49,7 +49,7 @@ extern "C" {
  *   of the argv[i] from commandline.
  *
  * 2. Double dash ("--") is not automatically prepended to
- *    CMDLINE_OPTION::longname. (If you desire any leadin dash, include it
+ *    CMDLINE_OPTION::longname. (If you desire any leading dash, include it
  *    explicitly in CMDLINE_OPTION initialization.)
  *
  * 3. An argument (optionally after a whitespace) is required (the flag
