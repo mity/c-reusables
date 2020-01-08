@@ -55,7 +55,7 @@ extern "C" {
 #endif
 
 
-/* This header implements (an intrusive) red-black tree.
+/* This header implements (intrusive) red-black tree.
  *
  * See e.g. https://en.wikipedia.org/wiki/Red–black_tree if you are unfamiliar
  * with the concept of red-black tree.
@@ -69,8 +69,8 @@ extern "C" {
  *
  * Also note we do not distinguish any "key" from "data". Caller has to
  * provide his own comparator function for defining the order of the data in
- * the tree and it's up to application to decide which data the node holds
- * serve as the "key", i.e. are used for the ordering.
+ * the tree and it's up to application to decide which data serve as the "key",
+ * i.e. are used for the ordering.
  *
  * The design decision has some consequences:
  *
@@ -87,11 +87,15 @@ extern "C" {
  *   update the pointers in the node structure (and those in other nodes of
  *   the tree).
  *
- *   Caller has to allocate and initialize the payload node structure (which
- *   embeds the RBTREE_NODE) _before_ he inserts it onto the tree (so that the
- *   node can be compared to other nodes in the tree). Similarly, caller is
- *   responsible for freeing any resources the payload structure holds _after_
- *   it is removed from the tree.
+ *   Caller has to allocate and initialize the data structure (at least to the
+ *   degree needed by the comparator function) the enclosing data structure
+ *   _before_ he inserts it into the tree. Similarly, caller is responsible for
+ *   freeing any resources the payload structure holds _after_ it is removed
+ *   from the tree.
+ *
+ * - As long as the node is part of a tree, it must not be modified in any way
+ *   which would make the comparator function order it differently with respect
+ *   to the other nodes in the tree.
  *
  * Note of warning: The RBTREE_NODE stores its color in the least significant
  * bit of the RBTREE_NODE::left pointer. This means that all the RBTREE_NODE
