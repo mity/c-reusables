@@ -101,7 +101,7 @@ cmdline_read(const CMDLINE_OPTION* options, int argc, char** argv,
              * stdout" so treat it always as a non-option. */
             ret = callback(CMDLINE_OPTID_NONE, argv[i], userdata);
         } else if(strcmp(argv[i], "--") == 0) {
-            /* End of options. All the remaining tokens are on-option arguments
+            /* End of options. All the remaining tokens are non-options
              * even if they start with a dash. */
             after_doubledash = 1;
         } else if(fast_optarg_decision  &&  argv[i][0] != '-') {
