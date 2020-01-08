@@ -190,7 +190,8 @@ RBTREE_INLINE__ void rbtree_init(RBTREE* tree)
  */
 RBTREE_NODE* rbtree_fini_step(RBTREE* tree);
 
-/* The tree has to be initialized before it is used by any other function.
+
+/* Check whether the tree is empty. Returns non-zero if empty, zero otherwise.
  */
 RBTREE_INLINE__ int rbtree_is_empty(const RBTREE* tree)
         { return (tree->root == NULL); }
