@@ -117,9 +117,9 @@ test_fini(void)
     RBTREE_NODE* node;
     VAL* val;
     int i;
-    char visit_flag[100] = { 0 };
+    char visit_flag[1000] = { 0 };
 
-    for(i = 0; i < 100; i++)
+    for(i = 0; i < 1000; i++)
         TEST_CHECK(rbtree_insert(&tree, make_val(i), val_cmp) == 0);
     TEST_CHECK(rbtree_verify(&tree) == 0);
 
@@ -131,7 +131,7 @@ test_fini(void)
             break;
 
         val = RBTREE_DATA(node, VAL, the_node);
-        if(!TEST_CHECK(0 <= val->x  &&  val->x < 100))
+        if(!TEST_CHECK(0 <= val->x  &&  val->x < 1000))
             continue;
 
         TEST_CHECK(visit_flag[val->x] == 0);
@@ -139,7 +139,7 @@ test_fini(void)
 
         destroy_val(val);
     }
-    for(i = 0; i < 100; i++)
+    for(i = 0; i < 1000; i++)
         TEST_CHECK(visit_flag[i] != 0);
 
     /* Verify the tree is in a good shape for reuse. */
@@ -207,11 +207,11 @@ test_remove(void)
     RBTREE_NODE* removed;
     int i;
 
-    for(i = 0; i < 100; i++)
+    for(i = 0; i < 1000; i++)
         TEST_CHECK(rbtree_insert(&tree, make_val(i), val_cmp) == 0);
     TEST_CHECK(rbtree_verify(&tree) == 0);
 
-    for(i = 0; i < 100; i += 3) {
+    for(i = 0; i < 1000; i += 3) {
         key.x = i;
 
         /* Check the value is there. */
@@ -355,7 +355,7 @@ test_lookup_ex(void)
     VAL key;
     int i;
 
-    for(i = 0; i < 100; i++)
+    for(i = 0; i < 1000; i++)
         TEST_CHECK(rbtree_insert(&tree, make_val(i), val_cmp) == 0);
     TEST_CHECK(rbtree_verify(&tree) == 0);
 
