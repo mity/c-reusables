@@ -37,7 +37,7 @@ The following rules apply:
 
  * `data/buffer.[hc]`: Simple growing buffer.
 
- * `data/list.h`: Intrusive doubly-linked list.
+ * `data/list.h`: Intrusive doubly-linked and singly-linked lists.
 
  * `data/rbtree.[hc]`: Intrusive red-black tree.
 
