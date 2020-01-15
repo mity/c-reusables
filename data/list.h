@@ -2,7 +2,7 @@
  * C Reusables
  * <http://github.com/mity/c-reusables>
  *
- * Copyright (c) 2018 Martin Mitas
+ * Copyright (c) 2018-2020 Martin Mitas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -114,7 +114,9 @@ typedef struct LIST_NODE {
 
 /* List structure. Treat as opaque.
  */
-typedef LIST_NODE LIST;
+typedef struct LIST {
+    struct LIST_NODE main;
+} LIST;
 
 
 /* Macro for getting pointer to the structure holding list node data.
@@ -126,22 +128,22 @@ typedef LIST_NODE LIST;
 /* The list has to be initialized before it is used by any other function.
  */
 LIST_INLINE__ void list_init(LIST* list)
-        { list->p = list->n = list; }
+        { list->main.p = list->main.n = &list->main; }
 
 
 /* Check whether the list is empty or not.
  */
 LIST_INLINE__ int list_is_empty(const LIST* list)
-        { return (list->p == list); }
+        { return (list->main.p == &list->main); }
 
 
 /* Iterating the list.
  */
-LIST_INLINE__ LIST_NODE* list_head(const LIST* list)        { return list->n; }
-LIST_INLINE__ LIST_NODE* list_tail(const LIST* list)        { return list->p; }
+LIST_INLINE__ LIST_NODE* list_head(const LIST* list)        { return list->main.n; }
+LIST_INLINE__ LIST_NODE* list_tail(const LIST* list)        { return list->main.p; }
 LIST_INLINE__ LIST_NODE* list_prev(const LIST_NODE* node)   { return node->p; }
 LIST_INLINE__ LIST_NODE* list_next(const LIST_NODE* node)   { return node->n; }
-LIST_INLINE__ const LIST_NODE* list_end(const LIST* list)   { return list; }
+LIST_INLINE__ const LIST_NODE* list_end(const LIST* list)   { return &list->main; }
 
 /* Add the given node into the list.
  *
@@ -150,9 +152,9 @@ LIST_INLINE__ const LIST_NODE* list_end(const LIST* list)   { return list; }
  * same list), the result is undefined.
  */
 LIST_INLINE__ void list_append(LIST* list, LIST_NODE* node)
-        { node->p = list->p; node->n = list; node->p->n = node; node->n->p = node; }
+        { node->p = list->main.p; node->n = &list->main; node->p->n = node; node->n->p = node; }
 LIST_INLINE__ void list_prepend(LIST* list, LIST_NODE* node)
-        { node->p = list; node->n = list->n; node->p->n = node; node->n->p = node; }
+        { node->p = &list->main; node->n = list->main.n; node->p->n = node; node->n->p = node; }
 LIST_INLINE__ void list_insert_after(LIST_NODE* node_where, LIST_NODE* node)
         { node->p = node_where; node->n = node_where->n; node->p->n = node; node->n->p = node; }
 LIST_INLINE__ void list_insert_before(LIST_NODE* node_where, LIST_NODE* node)
