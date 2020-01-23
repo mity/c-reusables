@@ -119,8 +119,7 @@ BUFFER_INLINE__ void* stack_peek_raw(STACK* stack, size_t n)
 BUFFER_INLINE__ void stack_peek(STACK* stack, void* addr, size_t n)
         { memcpy(addr, buffer_data_at(stack, stack_size(stack) - n), n); }
 BUFFER_INLINE__ void* stack_pop_raw(STACK* stack, size_t n)
-        { return buffer_data_at(stack, stack_size(stack) - n);
-          buffer_remove(stack, stack_size(stack) - n, n); }
+        { stack->size -= n; return buffer_data_at(stack, stack->size); }
 BUFFER_INLINE__ void stack_pop(STACK* stack, void* addr, size_t n)
         { stack_peek(stack, addr, n);
           buffer_remove(stack, stack_size(stack) - n, n); }
