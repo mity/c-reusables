@@ -54,9 +54,9 @@ extern "C" {
 
 /* This header implements few simple intrusive linked lists:
  *
- *  - Double linked lists (LIST)
- *  - Singly linked lists (SLIST)
- *  - Singly linked lists which also the tail, aka queue (QLIST)
+ *  - Double-linked lists (LIST)
+ *  - Single-linked lists (SLIST)
+ *  - Single-linked lists which also the tail, aka queue (QLIST)
  *
  * The word intrusive means our node structures (LIST_NODE, SLIST_NODE or
  * QLIST_NODE) don't hold any data on their own. Instead, you are supposed to
@@ -66,7 +66,7 @@ extern "C" {
  *
  * The naming of all operations follows a common pattern <listtype>_<operation>,
  * so e.g. list_next() is used to advance to the following node in the doubly
- * linked list and slist_next() in singly linked list.
+ * linked list and slist_next() in single-linked list.
  *
  * For all the manipulations with the lists, you are supposed to use pointer
  * to our node structures (LIST_NODE, SLIST_NODE or QLIST_NODE). To retrieve
@@ -84,7 +84,7 @@ extern "C" {
  * function list_end(), which can be used similarly as std::vector::end() in
  * C++ (both in forward as well as backward iteration).
  *
- * Hence, the typical iteration over e.g. the doubly linked list may look like
+ * Hence, the typical iteration over e.g. the double-linked list may look like
  * this:
  *
  * ````
@@ -209,7 +209,7 @@ LIST_INLINE__ void list_remove_tail(LIST* list)
 
 
 /**********************************
- *** SLIST (singly linked list) ***
+ *** SLIST (single-linked list) ***
  **********************************/
 
 /* List node structure. Treat as opaque.
@@ -270,7 +270,7 @@ LIST_INLINE__ void slist_remove_head(SLIST* list)
 
 
 /*****************************************************
- *** QLIST (queue or singly linked list with tail) ***
+ *** QLIST (queue or single-linked list with tail) ***
  *****************************************************/
 
 /* List node structure. Treat as opaque.
