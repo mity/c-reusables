@@ -54,7 +54,7 @@
  * Note the result is undefined if value_max < value_min. */
 #ifndef CLAMP
     #define CLAMP(value,value_min,value_max)                    \
-                                    MIN(MAX((value), (value_max)), (value_min))
+                                    MIN(MAX((value), (value_min)), (value_max))
 #endif
 
 #ifndef ABS
