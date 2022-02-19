@@ -50,10 +50,11 @@
     #define MAX3(a,b,c)             MAX(MAX((a), (b)), (c))
 #endif
 
-/* Clamp A into the range defined by B (the lowest allowed value) and C
- * (the highest allowed value). Note the result is undefined if B > C. */
+/* Clamp a value into a range.
+ * Note the result is undefined if value_max < value_min. */
 #ifndef CLAMP
-    #define CLAMP(a,b,c)            MIN(MAX((a), (b)), (c))
+    #define CLAMP(value,value_min,value_max)                    \
+                                    MIN(MAX((value), (value_max)), (value_min))
 #endif
 
 #ifndef ABS
