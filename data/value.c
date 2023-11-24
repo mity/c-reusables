@@ -721,6 +721,35 @@ value_string_length(const VALUE* v)
  *** VALUE_ARRAY ***
  *******************/
 
+/* Mitigate heap fragmentation by rounding buffer allocation sizes to
+ * reasonable numbers. */
+static size_t
+value_array_good_alloc_size(size_t alloc)
+{
+    size_t good_alloc;
+
+    if(alloc <= 16) {
+        good_alloc = 1;
+        while(good_alloc < alloc)
+            good_alloc *= 2;
+    } else {
+        /* For larger buffers, we subtract 32 bytes (== 2*sizeof(VALUE)) as
+         * the libc heap allocator needs some space for internal bookkeeping,
+         * and these would cause that two small blocks cannot fit into a window
+         * previously freed from twice as malloc'ed block.
+         *
+         * (AFAIK, most allocators use 8 or 16 bytes for the purpose, but lets
+         * be little bit more conservative.)
+         */
+        good_alloc = 16;
+        while(good_alloc-2 < alloc)
+            good_alloc *= 2;
+        good_alloc -= 2;
+    }
+
+    return good_alloc;
+}
+
 static ARRAY*
 value_array_payload(VALUE* v)
 {
@@ -792,9 +821,7 @@ value_array_insert(VALUE* v, size_t index)
         return NULL;
 
     if(a->size >= a->alloc) {
-        if(value_array_realloc(a, (a->alloc > 0)
-                    ? a->alloc + (a->alloc+1) / 2
-                    : 1) != 0)
+        if(value_array_realloc(a, value_array_good_alloc_size(a->alloc + 1)) != 0)
             return NULL;
     }
 
@@ -831,8 +858,8 @@ value_array_remove_range(VALUE* v, size_t index, size_t count)
     }
     a->size -= count;
 
-    if(3 * a->size < a->alloc)
-        value_array_realloc(a, a->alloc / 2);
+    if(a->size < a->alloc / 4)
+        value_array_realloc(a, value_array_good_alloc_size(a->size * 2));
 
     return 0;
 }
