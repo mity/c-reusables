@@ -2,7 +2,7 @@
  * C Reusables
  * <http://github.com/mity/c-reusables>
  *
- * Copyright (c) 2018-2019 Martin Mitas
+ * Copyright (c) 2018-2023 Martin Mitas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -26,6 +26,39 @@
 #include "buffer.h"
 
 
+/* Mitigate heap fragmentation by rounding buffer allocation sizes to
+ * reasonable numbers. */
+static size_t
+buffer_good_alloc_size(size_t alloc)
+{
+    size_t good_alloc;
+
+    if(alloc <= 256) {
+        good_alloc = 8;
+        while(good_alloc < alloc)
+            good_alloc *= 2;
+    } else if(alloc > SIZE_MAX / 2) {
+        /* Prevent overflow in the branch below. */
+        good_alloc = SIZE_MAX;
+    } else {
+        /* For larger buffers, we subtract 32 bytes as the libc heap allocator
+         * needs some space for internal bookkeeping, and these would cause
+         * that two small blocks cannot fit into a window previously freed
+         * from twice as malloc'ed block.
+         *
+         * (AFAIK, most allocators use 8 or 16 bytes for the purpose, but lets
+         * be little bit more conservative.)
+         */
+        good_alloc = 512;
+        while(good_alloc-32 < alloc)
+            good_alloc *= 2;
+        good_alloc -= 32;
+    }
+
+    return good_alloc;
+}
+
+
 int
 buffer_realloc(BUFFER* buf, size_t alloc)
 {
@@ -43,27 +76,36 @@ buffer_realloc(BUFFER* buf, size_t alloc)
 }
 
 int
-buffer_reserve(BUFFER* buf, size_t extra_alloc)
+buffer_reserve(BUFFER* buf, size_t n)
 {
-    if(buf->size + extra_alloc > buf->alloc)
-        return buffer_realloc(buf, buf->size + extra_alloc);
-    else
+    size_t alloc;
+
+    if(buf->size + n < buf->alloc)
         return 0;
+
+    if(n > SIZE_MAX - buf->size)
+        return -1;
+    alloc = buf->size + n;
+    alloc = buffer_good_alloc_size(alloc);
+
+    return buffer_realloc(buf, alloc);
 }
 
 void
 buffer_shrink(BUFFER* buf)
 {
     /* Avoid realloc() if the potential memory gain is negligible. */
-    if(buf->alloc / 11 > buf->size / 10)
-        buffer_realloc(buf, buf->size);
+    if(buf->alloc < 8  ||  buf->alloc / 8 < buf->size / 7)
+        return;
+
+    buffer_realloc(buf, buf->size);
 }
 
 void*
 buffer_insert_raw(BUFFER* buf, size_t pos, size_t n)
 {
     if(buf->size + n > buf->alloc) {
-        if(buffer_realloc(buf, buf->size + n + buf->size / 2) != 0)
+        if(buffer_reserve(buf, n) != 0)
             return NULL;
     }
 
@@ -95,6 +137,16 @@ buffer_remove(BUFFER* buf, size_t pos, size_t n)
         buf->size -= n;
     } else {
         buf->size = pos;
+    }
+
+    if(buf->size == 0) {
+        free(buf->data);
+        buf->data = NULL;
+        buf->alloc = 0;
+    } else if(buf->size < buf->alloc / 4) {
+        /* No error checking here: If the realloc fails, we still have valid
+         * albeit bloated buffer. */
+        buffer_realloc(buf, buffer_good_alloc_size(buf->size * 2));
     }
 }
 

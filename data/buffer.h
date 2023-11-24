@@ -67,9 +67,9 @@ BUFFER_INLINE__ void buffer_fini(BUFFER* buf)
 /* Change capacity of the buffer. If lower then current size, the data contents
  * beyond the new buffer capacity is lost. */
 int buffer_realloc(BUFFER* buf, size_t alloc);
-/* Reserve new space for extra_alloc bytes at the end of the buffer. */
-int buffer_reserve(BUFFER* buf, size_t extra_alloc);
-/* Remove the empty space from the buffer. */
+/* Reserve new space for at least n bytes at the end of the buffer. */
+int buffer_reserve(BUFFER* buf, size_t n);
+/* Remove any empty space from the buffer. */
 void buffer_shrink(BUFFER* buf);
 
 /* Contents getters. */

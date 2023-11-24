@@ -72,18 +72,18 @@ test_reserve(void)
     char c;
 
     buffer_reserve(&buf, n);
-    TEST_CHECK(buf.alloc == n);
+    TEST_CHECK(buf.alloc >= n);
 
     for(i = 0; i < n; i++) {
         TEST_CHECK(buf.size == i);
-        TEST_CHECK(buf.alloc == n);
+        TEST_CHECK(buf.alloc >= n);
 
         c = (char) i;
         buffer_append(&buf, &c, 1);
     }
 
     TEST_CHECK(buf.size == n);
-    TEST_CHECK(buf.alloc == n);
+    TEST_CHECK(buf.alloc >= n);
 
     buffer_fini(&buf);
 }
@@ -99,7 +99,7 @@ test_shrink(void)
     TEST_CHECK(buf.size == 10);
 
     buffer_shrink(&buf);
-    TEST_CHECK(buf.alloc == 10);
+    TEST_CHECK(buf.alloc >= 10);
     TEST_CHECK(buf.size == 10);
 
     buffer_fini(&buf);
