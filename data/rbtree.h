@@ -173,9 +173,8 @@ RBTREE_INLINE__ void rbtree_init(RBTREE* tree)
  *
  * Note that once the operation starts, the tree must not be used anymore for
  * anything else until the cleaning of the tree is complete. Once this function
- * is called, the tree's internal state gets broken for any other purpose but
- * finishing the clean-up by traversing the other nodes. After the clean-up is
- * complete, you get a valid (empty) tree.
+ * is called, the tree's internal state gets broken for any other purpose.
+ * After the whole clean-up operation is complete, you get a valid (empty) tree.
  *
  * The function is actually just a specialized light-weight iteration over all
  * tree nodes, disconnecting them one by one out from the tree, without any
@@ -190,13 +189,6 @@ RBTREE_INLINE__ void rbtree_init(RBTREE* tree)
  * single memory buffer, which can be freed at once) then you do not need to
  * use this function at all: Instead, simply free the buffer and re-initialize
  * the tree handle for reuse if needed.
- *
- * The function removes any node from the tree, and returns a pointer to it
- * so that the caller can release any resources associated with it.
- *
- * Finally, when all nodes are removed from the tree, the function
- * re-initializes the tree for a potential reuse (i.e. the tree becomes valid
- * and empty) and the function returns NULL to indicate the end of the clean-up.
  *
  * (Compatibility note: You should not rely on any particular order of the
  * nodes when using this function. If we find more efficient algorithm for the
@@ -260,7 +252,7 @@ typedef struct RBTREE_CURSOR {
     /* (2 * 8 * sizeof(void*)) is good enough to handle RB-trees of _any_ size.
      * Consider there cannot be more then 2^(8*sizeof(void*)) nodes in the
      * process memory and the longest root<-->leaf path in any RB-tree cannot
-     * be longer then twice the shortest one. */
+     * be longer than twice the shortest one. */
     RBTREE_NODE* stack[2 * 8 * sizeof(void*)];
     unsigned n;
 } RBTREE_CURSOR;
@@ -281,10 +273,10 @@ RBTREE_NODE* rbtree_lookup_ex(RBTREE* tree, const RBTREE_NODE* key,
  */
 RBTREE_NODE* rbtree_current(RBTREE_CURSOR* cur);
 
-/* The functions rbtree_head() and rbtree_tail() retrieve the first or last
+/* The functions rbtree_head() and rbtree_tail() retrieve the first or the last
  * node in the tree.
  *
- * The functions rbtree_next() and rbtree_prev() move the cursor the next or
+ * The functions rbtree_next() and rbtree_prev() move the cursor to the next or
  * the previous node (in the order as defined by the comparator function used
  * during construction of the tree).
  *

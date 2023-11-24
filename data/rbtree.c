@@ -48,8 +48,7 @@
 typedef RBTREE_CURSOR RBTREE_PATH;
 
 
-/* Helper tree "rotation" operations, used as a primitives for re-balancing
- * the tree. */
+/* Helper tree "rotation" operations, used as primitives for re-balancing. */
 static void
 rbtree_rotate_left(RBTREE* tree, RBTREE_NODE* parent, RBTREE_NODE* node)
 {
@@ -122,7 +121,7 @@ rbtree_fini_step(RBTREE* tree)
 
         /* The node now can have at most one child (the right one). I.e. we can
          * rip out the current node and "upgrade" the right subtree (or NULL)
-         * one level up into this node's place. This should be cheaper then
+         * one level up into this node's place. This should be cheaper than
          * iterating to some leaf in the right subtree. */
         *pointer_down_to_node = RIGHT(node);
     }
@@ -309,7 +308,7 @@ rbtree_remove_fixup(RBTREE* tree, RBTREE_PATH* path)
 
         parent = path->stack[path->n - 2];
         /* Sibling is guaranteed to exist because its subtree must have larger
-         * black count then our subtree (we have the deficit, right?). */
+         * black count than our subtree (we have the deficit, right?). */
         sibling = (node == LEFT(parent)) ? RIGHT(parent) : LEFT(parent);
         grandparent = (path->n > 2) ? path->stack[path->n - 3] : NULL;
 
@@ -442,7 +441,7 @@ rbtree_remove(RBTREE* tree, const RBTREE_NODE* key, RBTREE_CMP_FUNC cmp_func)
         }
     }
 
-    /* The node now cannot have more then one child. Move the child (or NULL)
+    /* The node now cannot have more than one child. Move the child (or NULL)
      * upwards to take the place of the node being removed. As a side effect,
      * it leaves the original node disconnected from the tree hierarchy. */
     single_child = (LEFT(node) != NULL) ? LEFT(node) : RIGHT(node);
@@ -593,7 +592,7 @@ rbtree_verify_recurse(RBTREE_NODE* node)
     for(i = 0; i < 2; i++) {
         child = children[i];
 
-        /* Correct tree must never have a node and its child red. */
+        /* Correct tree must never have both a node and its child red. */
         if(IS_RED(node) && child != NULL && IS_RED(child))
             return -1;
 
@@ -614,7 +613,7 @@ rbtree_verify_recurse(RBTREE_NODE* node)
 int
 rbtree_verify(RBTREE* tree)
 {
-    /* Correct tree must have a black root (NULL is considered black). */
+    /* Correct non-empty tree must have a black root. */
     if(tree->root != NULL  &&  IS_RED(tree->root))
         return -1;
 
