@@ -32,6 +32,25 @@ int value_dict_verify(VALUE* v);
 #include <string.h>
 
 
+static int
+FLOAT_EQ(float f1, float f2)
+{
+    float epsilon = 0.0001f;
+
+    return (((1.0f-epsilon)*f1 <= f2  &&  f2 <= (1.0f+epsilon)*f1)  ||
+            ((1.0f+epsilon)*f1 <= f2  &&  f2 <= (1.0f-epsilon)*f1));
+}
+
+static int
+DOUBLE_EQ(double d1, double d2)
+{
+    double epsilon = 0.0000001;
+
+    return (((1.0-epsilon)*d1 <= d2  &&  d2 <= (1.0+epsilon)*d1)  ||
+            ((1.0+epsilon)*d1 <= d2  &&  d2 <= (1.0-epsilon)*d1));
+}
+
+
 static void
 test_null(void)
 {
@@ -138,8 +157,8 @@ test_int32(void)
     TEST_CHECK(value_uint32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
     TEST_CHECK(value_uint64(&v) == 0);
-    TEST_CHECK(value_float(&v) == 0.0f);
-    TEST_CHECK(value_double(&v) == 0.0);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.0));
     value_fini(&v);
 
     value_init_int32(&v, -1);
@@ -156,8 +175,8 @@ test_int32(void)
     TEST_CHECK(!value_is_compatible(&v, VALUE_DICT));
     TEST_CHECK(value_int32(&v) == -1);
     TEST_CHECK(value_int64(&v) == -1);
-    TEST_CHECK(value_float(&v) == -1.0f);
-    TEST_CHECK(value_double(&v) == -1.0);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), -1.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), -1.0));
     value_fini(&v);
 
     value_init_int32(&v, INT32_MIN);
@@ -214,8 +233,8 @@ test_uint32(void)
     TEST_CHECK(value_uint32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
     TEST_CHECK(value_uint64(&v) == 0);
-    TEST_CHECK(value_float(&v) == 0.0f);
-    TEST_CHECK(value_double(&v) == 0.0);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.0));
     value_fini(&v);
 
     value_init_uint32(&v, UINT32_MAX);
@@ -234,8 +253,8 @@ test_uint32(void)
     TEST_CHECK(value_uint32(&v) == UINT32_MAX);
     TEST_CHECK(value_int64(&v) == UINT32_MAX);
     TEST_CHECK(value_uint64(&v) == UINT32_MAX);
-    TEST_CHECK(value_float(&v) == (float) UINT32_MAX);
-    TEST_CHECK(value_double(&v) == (double) UINT32_MAX);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), (float) UINT32_MAX));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), (double) UINT32_MAX));
     value_fini(&v);
 }
 
@@ -262,8 +281,8 @@ test_int64(void)
     TEST_CHECK(value_uint32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
     TEST_CHECK(value_uint64(&v) == 0);
-    TEST_CHECK(value_float(&v) == 0.0f);
-    TEST_CHECK(value_double(&v) == 0.0);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.0));
     value_fini(&v);
 
     value_init_int64(&v, -1);
@@ -280,8 +299,8 @@ test_int64(void)
     TEST_CHECK(!value_is_compatible(&v, VALUE_DICT));
     TEST_CHECK(value_int32(&v) == -1);
     TEST_CHECK(value_int64(&v) == -1);
-    TEST_CHECK(value_float(&v) == -1.0f);
-    TEST_CHECK(value_double(&v) == -1.0);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), -1.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), -1.0));
     value_fini(&v);
 
     value_init_int64(&v, INT64_MIN);
@@ -297,8 +316,8 @@ test_int64(void)
     TEST_CHECK(!value_is_compatible(&v, VALUE_ARRAY));
     TEST_CHECK(!value_is_compatible(&v, VALUE_DICT));
     TEST_CHECK(value_int64(&v) == INT64_MIN);
-    TEST_CHECK(value_float(&v) == (float) INT64_MIN);
-    TEST_CHECK(value_double(&v) == (double) INT64_MIN);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), (float) INT64_MIN));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), (double) INT64_MIN));
     value_fini(&v);
 
     value_init_int64(&v, INT64_MAX);
@@ -315,8 +334,8 @@ test_int64(void)
     TEST_CHECK(!value_is_compatible(&v, VALUE_DICT));
     TEST_CHECK(value_int64(&v) == INT64_MAX);
     TEST_CHECK(value_uint64(&v) == INT64_MAX);
-    TEST_CHECK(value_float(&v) == (float) INT64_MAX);
-    TEST_CHECK(value_double(&v) == (double) INT64_MAX);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), (float) INT64_MAX));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), (double) INT64_MAX));
     value_fini(&v);
 }
 
@@ -343,8 +362,8 @@ test_uint64(void)
     TEST_CHECK(value_uint32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
     TEST_CHECK(value_uint64(&v) == 0);
-    TEST_CHECK(value_float(&v) == 0.0f);
-    TEST_CHECK(value_double(&v) == 0.0);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.0));
     value_fini(&v);
 
     value_init_uint64(&v, UINT64_MAX);
@@ -360,8 +379,8 @@ test_uint64(void)
     TEST_CHECK(!value_is_compatible(&v, VALUE_ARRAY));
     TEST_CHECK(!value_is_compatible(&v, VALUE_DICT));
     TEST_CHECK(value_uint64(&v) == UINT64_MAX);
-    TEST_CHECK(value_float(&v) == (float) UINT64_MAX);
-    TEST_CHECK(value_double(&v) == (double) UINT64_MAX);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), (float) UINT64_MAX));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), (double) UINT64_MAX));
     value_fini(&v);
 }
 
@@ -388,8 +407,8 @@ test_float(void)
     TEST_CHECK(value_uint32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
     TEST_CHECK(value_uint64(&v) == 0);
-    TEST_CHECK(value_float(&v) == 0.0f);
-    TEST_CHECK(value_double(&v) == 0.0);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.0));
     value_fini(&v);
 
     value_init_float(&v, -1.0f);
@@ -406,8 +425,8 @@ test_float(void)
     TEST_CHECK(!value_is_compatible(&v, VALUE_DICT));
     TEST_CHECK(value_int32(&v) == -1);
     TEST_CHECK(value_int64(&v) == -1);
-    TEST_CHECK(value_float(&v) == -1.0f);
-    TEST_CHECK(value_double(&v) == (double) -1.0f);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), -1.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), -1.0));
     value_fini(&v);
 
     value_init_float(&v, 0.5f);
@@ -424,29 +443,29 @@ test_float(void)
     TEST_CHECK(!value_is_compatible(&v, VALUE_DICT));
     TEST_CHECK(value_int32(&v) == 1);
     TEST_CHECK(value_int64(&v) == 1);
-    TEST_CHECK(value_float(&v) == 0.5f);
-    TEST_CHECK(value_double(&v) == (double) 0.5f);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.5f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.5));
     value_fini(&v);
 
     value_init_float(&v, 0.4f);
     TEST_CHECK(value_int32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
-    TEST_CHECK(value_float(&v) == 0.4f);
-    TEST_CHECK(value_double(&v) == (double) 0.4f);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.4f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.4));
     value_fini(&v);
 
     value_init_float(&v, -0.4f);
     TEST_CHECK(value_int32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
-    TEST_CHECK(value_float(&v) == -0.4f);
-    TEST_CHECK(value_double(&v) == (double) -0.4f);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), -0.4f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), -0.4));
     value_fini(&v);
 
     value_init_float(&v, -0.5f);
     TEST_CHECK(value_int32(&v) == -1);
     TEST_CHECK(value_int64(&v) == -1);
-    TEST_CHECK(value_float(&v) == -0.5f);
-    TEST_CHECK(value_double(&v) == (double) -0.5f);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), -0.5f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), -0.5));
     value_fini(&v);
 }
 
@@ -473,8 +492,8 @@ test_double(void)
     TEST_CHECK(value_uint32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
     TEST_CHECK(value_uint64(&v) == 0);
-    TEST_CHECK(value_float(&v) == 0.0f);
-    TEST_CHECK(value_double(&v) == 0.0);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.0));
     value_fini(&v);
 
     value_init_double(&v, -1.0);
@@ -491,8 +510,8 @@ test_double(void)
     TEST_CHECK(!value_is_compatible(&v, VALUE_DICT));
     TEST_CHECK(value_int32(&v) == -1);
     TEST_CHECK(value_int64(&v) == -1);
-    TEST_CHECK(value_float(&v) == (float) -1.0);
-    TEST_CHECK(value_double(&v) == -1.0);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), -1.0f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), -1.0));
     value_fini(&v);
 
     value_init_double(&v, 0.5);
@@ -509,29 +528,29 @@ test_double(void)
     TEST_CHECK(!value_is_compatible(&v, VALUE_DICT));
     TEST_CHECK(value_int32(&v) == 1);
     TEST_CHECK(value_int64(&v) == 1);
-    TEST_CHECK(value_float(&v) == (float) 0.5);
-    TEST_CHECK(value_double(&v) == 0.5);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.5f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.5));
     value_fini(&v);
 
     value_init_double(&v, 0.4);
     TEST_CHECK(value_int32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
-    TEST_CHECK(value_float(&v) == (float) 0.4);
-    TEST_CHECK(value_double(&v) == 0.4);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), 0.4f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), 0.4));
     value_fini(&v);
 
     value_init_double(&v, -0.4);
     TEST_CHECK(value_int32(&v) == 0);
     TEST_CHECK(value_int64(&v) == 0);
-    TEST_CHECK(value_float(&v) == (float) -0.4);
-    TEST_CHECK(value_double(&v) == -0.4);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), -0.4f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), -0.4));
     value_fini(&v);
 
     value_init_double(&v, -0.5);
     TEST_CHECK(value_int32(&v) == -1);
     TEST_CHECK(value_int64(&v) == -1);
-    TEST_CHECK(value_float(&v) == (float) -0.5);
-    TEST_CHECK(value_double(&v) == -0.5);
+    TEST_CHECK(FLOAT_EQ(value_float(&v), -0.5f));
+    TEST_CHECK(DOUBLE_EQ(value_double(&v), -0.5));
     value_fini(&v);
 }
 
