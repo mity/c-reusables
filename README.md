@@ -1,5 +1,4 @@
-[![Linux Build Status (travis-ci.com)](https://img.shields.io/travis/mity/c-reusables/master.svg?logo=linux&label=linux%20build)](https://travis-ci.com/mity/c-reusables)
-[![Windows Build Status (appveyor.com)](https://img.shields.io/appveyor/ci/mity/c-reusables/master.svg?logo=windows&label=windows%20build)](https://ci.appveyor.com/project/mity/c-reusables/branch/master)
+[![Build Status](https://github.com/mity/c-reusables/actions/workflows/ci-build.yml/badge.svg)](https://github.com/mity/c-reusables/actions/workflows/ci-build.yml)
 [![Code Coverage (codecov.io)](https://img.shields.io/codecov/c/github/mity/c-reusables/master.svg?logo=codecov&label=code%20coverage)](https://codecov.io/github/mity/c-reusables)
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/mity-c-reusables.svg?label=coverity%20scan)](https://scan.coverity.com/projects/mity-c-reusables)
 
