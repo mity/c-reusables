@@ -64,13 +64,22 @@ buffer_realloc(BUFFER* buf, size_t alloc)
 {
     void* tmp;
 
+    if(alloc == buf->alloc)
+        return 0;
+
+    if(alloc == 0) {
+        free(buf->data);
+        buffer_init(buf);
+        return 0;
+    }
+
     tmp = realloc(buf->data, alloc);
-    if(tmp == NULL  &&  alloc > 0)
+    if(tmp == NULL)
         return -1;
 
     buf->data = tmp;
     buf->alloc = alloc;
-    if(buf->size > alloc)
+    if(alloc < buf->size)
         buf->size = alloc;
     return 0;
 }
