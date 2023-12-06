@@ -104,7 +104,7 @@ void
 buffer_shrink(BUFFER* buf)
 {
     /* Avoid realloc() if the potential memory gain is negligible. */
-    if(buf->alloc < 8  ||  buf->alloc / 8 < buf->size / 7)
+    if((0 < buf->alloc && buf->alloc < 8)  ||  buf->alloc / 8 < buf->size / 7)
         return;
 
     buffer_realloc(buf, buf->size);
