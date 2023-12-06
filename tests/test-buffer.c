@@ -99,7 +99,7 @@ test_shrink(void)
     TEST_CHECK(buf.size == 10);
 
     buffer_shrink(&buf);
-    TEST_CHECK(buf.alloc >= 10);
+    TEST_CHECK(10 <= buf.alloc  &&  buf.alloc <= 20);
     TEST_CHECK(buf.size == 10);
 
     buffer_fini(&buf);
