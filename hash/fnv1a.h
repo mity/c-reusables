@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 
-/* Fowler–Noll–Vo hash implementation.
+/* Fowler-Noll-Vo hash implementation.
  * (http://www.isthe.com/chongo/tech/comp/fnv/)
  *
  * We implement 1a variant of the function as it is generally recommended
