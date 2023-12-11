@@ -29,19 +29,16 @@
 /* Mitigate heap fragmentation by rounding buffer allocation sizes to
  * reasonable numbers. */
 static size_t
-buffer_good_alloc_size(size_t alloc)
+buffer_good_alloc_size(size_t requested_alloc)
 {
     size_t good_alloc;
 
-    if(alloc <= 256) {
-        good_alloc = 8;
-        while(good_alloc < alloc)
+    if(requested_alloc <= 256) {
+        good_alloc = 16;
+        while(good_alloc < requested_alloc)
             good_alloc *= 2;
-    } else if(alloc > SIZE_MAX / 2) {
-        /* Prevent overflow in the branch below. */
-        good_alloc = SIZE_MAX;
     } else {
-        /* For larger buffers, we subtract 32 bytes as the libc heap allocator
+        /* For larger buffers we subtract 32 bytes as the libc heap allocator
          * needs some space for internal bookkeeping, and these would cause
          * that two small blocks cannot fit into a window previously freed
          * from twice as malloc'ed block.
@@ -50,7 +47,7 @@ buffer_good_alloc_size(size_t alloc)
          * be little bit more conservative.)
          */
         good_alloc = 512;
-        while(good_alloc-32 < alloc)
+        while(good_alloc-32 < requested_alloc)
             good_alloc *= 2;
         good_alloc -= 32;
     }
@@ -92,8 +89,6 @@ buffer_reserve(BUFFER* buf, size_t n)
     if(buf->size + n < buf->alloc)
         return 0;
 
-    if(n > SIZE_MAX - buf->size)
-        return -1;
     alloc = buf->size + n;
     alloc = buffer_good_alloc_size(alloc);
 
@@ -111,26 +106,26 @@ buffer_shrink(BUFFER* buf)
 }
 
 void*
-buffer_insert_raw(BUFFER* buf, size_t pos, size_t n)
+buffer_insert_raw(BUFFER* buf, size_t off, size_t n)
 {
     if(buf->size + n > buf->alloc) {
         if(buffer_reserve(buf, n) != 0)
             return NULL;
     }
 
-    if(buf->size > pos)
-        memmove((uint8_t*)buf->data + pos + n, (uint8_t*)buf->data + pos, buf->size - pos);
+    if(buf->size > off)
+        memmove((uint8_t*)buf->data + off + n, (uint8_t*)buf->data + off, buf->size - off);
 
     buf->size += n;
-    return buffer_data_at(buf, pos);
+    return buffer_data_at(buf, off);
 }
 
 int
-buffer_insert(BUFFER* buf, size_t pos, const void* data, size_t n)
+buffer_insert(BUFFER* buf, size_t off, const void* data, size_t n)
 {
     void* ptr;
 
-    ptr = buffer_insert_raw(buf, pos, n);
+    ptr = buffer_insert_raw(buf, off, n);
     if(ptr == NULL)
         return -1;
 
@@ -139,13 +134,13 @@ buffer_insert(BUFFER* buf, size_t pos, const void* data, size_t n)
 }
 
 void
-buffer_remove(BUFFER* buf, size_t pos, size_t n)
+buffer_remove(BUFFER* buf, size_t off, size_t n)
 {
-    if(pos + n < buf->size) {
-        memmove((uint8_t*)buf->data + pos, (uint8_t*)buf->data + pos + n, n);
+    if(off + n < buf->size) {
+        memmove((uint8_t*)buf->data + off, (uint8_t*)buf->data + off + n, n);
         buf->size -= n;
     } else {
-        buf->size = pos;
+        buf->size = off;
     }
 
     if(buf->size == 0) {
