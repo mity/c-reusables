@@ -291,8 +291,8 @@ test_fnv1a_64(void)
 
         produced = fnv1a_64(FNV1A_BASE_64, str, n);
         if(!TEST_CHECK_(produced == expected, "vector '%.*s'", (int)n, str)) {
-            TEST_MSG("Expected: %llx", (unsigned) expected);
-            TEST_MSG("Produced: %llx", (unsigned) produced);
+            TEST_MSG("Expected: %llx", (unsigned long long) expected);
+            TEST_MSG("Produced: %llx", (unsigned long long) produced);
         }
     }
 }
