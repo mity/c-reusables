@@ -2,7 +2,7 @@
  * C Reusables
  * <http://github.com/mity/c-reusables>
  *
- * Copyright (c) 2018 Martin Mitas
+ * Copyright (c) 2018-2023 Martin Mitas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -129,13 +129,44 @@ test_remove(void)
     buffer_fini(&buf);
 }
 
+static void
+test_remove_most(void)
+{
+    BUFFER buf = BUFFER_INITIALIZER;
+    int i;
+
+    for(i = 0; i < 1000; i++)
+        buffer_append(&buf, "1234567890", 10);
+    buffer_remove(&buf, 1, 10*1000 - 3);
+    TEST_CHECK(buffer_size(&buf) == 3);
+    TEST_CHECK(buf.alloc < 100);
+
+    buffer_fini(&buf);
+}
+
+static void
+test_remove_all(void)
+{
+    BUFFER buf = BUFFER_INITIALIZER;
+
+    buffer_append(&buf, "1234567890", 10);
+    buffer_remove(&buf, 0, 10);
+    TEST_CHECK(buffer_size(&buf) == 0);
+    TEST_CHECK(buf.alloc == 0);
+    TEST_CHECK(buf.data == NULL);
+
+    buffer_fini(&buf);
+}
+
 
 TEST_LIST = {
-    { "init",       test_init },
-    { "grow",       test_grow },
-    { "reserve",    test_reserve },
-    { "shrink",     test_shrink },
-    { "insert",     test_insert },
-    { "remove",     test_remove },
+    { "init",           test_init },
+    { "grow",           test_grow },
+    { "reserve",        test_reserve },
+    { "shrink",         test_shrink },
+    { "insert",         test_insert },
+    { "remove",         test_remove },
+    { "remove-most",    test_remove_most },
+    { "remove-all",     test_remove_all },
     { 0 }
 };

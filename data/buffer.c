@@ -137,7 +137,7 @@ void
 buffer_remove(BUFFER* buf, size_t off, size_t n)
 {
     if(off + n < buf->size) {
-        memmove((uint8_t*)buf->data + off, (uint8_t*)buf->data + off + n, n);
+        memmove((uint8_t*)buf->data + off, (uint8_t*)buf->data + off + n, buf->size - off - n);
         buf->size -= n;
     } else {
         buf->size = off;
@@ -148,9 +148,12 @@ buffer_remove(BUFFER* buf, size_t off, size_t n)
         buf->data = NULL;
         buf->alloc = 0;
     } else if(buf->size < buf->alloc / 4) {
-        /* No error checking here: If the realloc fails, we still have valid
-         * albeit bloated buffer. */
-        buffer_realloc(buf, buffer_good_alloc_size(buf->size * 2));
+        size_t new_alloc = buffer_good_alloc_size(buf->size * 2);
+        if(new_alloc < buf->alloc / 2) {
+            /* No error checking here: If the realloc fails, we still have valid
+             * albeit bloated buffer. */
+            buffer_realloc(buf, new_alloc);
+        }
     }
 }
 
