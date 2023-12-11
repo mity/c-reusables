@@ -2,7 +2,7 @@
  * C Reusables
  * <http://github.com/mity/c-reusables>
  *
- * Copyright (c) 2020 Martin Mitas
+ * Copyright (c) 2020-2023 Martin Mitas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -33,23 +33,30 @@ extern "C" {
 #endif
 
 
-/* Implementation of a chunk memory allocator.
+/* Implementation of a simple chunk memory allocator.
  *
  * Often, programs need to incrementally allocate many small pieces of memory
  * which shall eventually all be freed at the same time.
  *
- * In such cases. using `malloc()` individually for each such allocation may be
- * quite expensive, both in terms of memory (due the general heap allocator
- * bookkeeping) as well as in terms of CPU cycles.
+ * In such use case, this allocator may be much more appropriate than general
+ * purpose allocator (`malloc()` + `free()`), as it brings multiple benefits:
  *
- * The chunk allocator, as provided here, solves this by `malloc`ing larger
- * block of memory and satisfying then the individual small allocations from
- * that block. When the block gets exhausted, a new block is allocated to
- * satisfy more requests.
+ * -- Smaller memory overhead per individual allocation. `malloc()` usually
+ *    needs extra 8 or 16 bytes per-allocation for its internal bookkeeping.
  *
- * With this allocator there is no memory overhead per individual allocation
- * but only per the larger block.
+ * -- The individual allocation is much faster.
+ *
+ * -- Freeing all the memory is also faster.
+ *
+ * Limitations:
+ *
+ * -- Do not use for allocations which need to be released individually.
+ * -- Do not use one instance of `MEMCHUNK` concurrently from multiple threads.
+ * -- Reallocations are not possible.
  */
+
+
+#define MEMCHUNK_DEFAULT_BLOCK_SIZE     1024
 
 
 typedef struct MEMCHUNK_BLOCK MEMCHUNK_BLOCK;
@@ -61,6 +68,10 @@ typedef struct MEMCHUNK {
     size_t block_size;
     size_t free_off;
 } MEMCHUNK;
+
+
+#define MEMCHUNK_INITIALIZER(block_size)                                \
+            { NULL, ((block_size) == 0) ? MEMCHUNK_DEFAULT_BLOCK_SIZE : (block_size), 0 }
 
 
 /* Initialize the chunk allocator.

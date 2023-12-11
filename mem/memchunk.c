@@ -35,7 +35,7 @@ void
 memchunk_init(MEMCHUNK* chunk, size_t block_size)
 {
     if(block_size == 0)
-        block_size = 1024;  /* Default block size. */
+        block_size = MEMCHUNK_DEFAULT_BLOCK_SIZE;
 
     chunk->block_size = block_size;
     chunk->free_off = block_size;
@@ -48,17 +48,17 @@ memchunk_alloc(MEMCHUNK* chunk, size_t size)
     void* ptr;
 
     /* Not enough free space in the head block? */
-    if(chunk->free_off + size > chunk->block_size) {
-        if(8 * size > chunk->block_size) {
+    if(chunk->head == NULL  ||  chunk->free_off + size > chunk->block_size) {
+        if(4 * size > chunk->block_size) {
             /* A big allocation.
              *
-             * If application asks for more memory then the block size, we
-             * have no other option then to malloc a special block dedicated
+             * If application asks for more memory than the block size, we
+             * have no other option but to malloc() a special block dedicated
              * just for the big request.
              *
              * We reuse this code path also for requests < block_size if their
-             * size is still quite big and there is not enough space in the
-             * head block. This is a simple policy to prevent wasting memory
+             * size is still quite big (and there is not enough space in the
+             * head block). This is a simple policy to prevent wasting memory
              * at the end of the chunk->head which still can possibly serve
              * future smaller requests. */
             MEMCHUNK_BLOCK* block;
@@ -69,15 +69,16 @@ memchunk_alloc(MEMCHUNK* chunk, size_t size)
             if(chunk->head != NULL) {
                 /* Insert _after_ the current chunk->head so that chunk->head
                  * is still available for the future (smaller) requests. */
-                chunk->next = chunk->head->next;
+                block->next = chunk->head->next;
                 chunk->head->next = block;
             } else {
+                block->next = NULL;
                 chunk->head = block;
-                chunk->next = NULL;
+                chunk->free_off = chunk->block_size;
             }
             return (void*)(block + 1);
         } else {
-            /* Allocate a new block. */
+            /* Allocate a standard new block. */
             MEMCHUNK_BLOCK* block;
 
             block = malloc(sizeof(MEMCHUNK_BLOCK) + chunk->block_size);
@@ -85,7 +86,7 @@ memchunk_alloc(MEMCHUNK* chunk, size_t size)
                 return NULL;
 
             /* Insert the new block as the 1st block in our list so that all
-             * (non-big) requests are served by it. */
+             * future (non-big) requests are served by it. */
             block->next = chunk->head;
             chunk->head = block;
             chunk->free_off = 0;
@@ -94,7 +95,7 @@ memchunk_alloc(MEMCHUNK* chunk, size_t size)
 
     /* The allocation itself: Simply take the requested amount of bytes
      * from the chunk->head block. */
-    ptr = (void*) (((char*)(chunk->block + 1)) + chunk->free_off);
+    ptr = (void*) (((char*)(chunk->head + 1)) + chunk->free_off);
     chunk->free_off += size;
     return ptr;
 }

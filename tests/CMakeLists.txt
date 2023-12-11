@@ -47,6 +47,9 @@ target_include_directories(test-defs PRIVATE ../misc)
 add_executable(test-malloca acutest.h test-malloca.c ../mem/malloca.h)
 target_include_directories(test-malloca PRIVATE ../mem)
 
+add_executable(test-memchunk acutest.h test-memchunk.c ../mem/memchunk.h ../mem/memchunk.c)
+target_include_directories(test-memchunk PRIVATE ../mem)
+
 if(WIN32)
     add_executable(test-memstream acutest.h test-memstream.c ../win32/memstream.h ../win32/memstream.c)
     target_include_directories(test-memstream PRIVATE ../win32)

@@ -64,10 +64,16 @@ The following rules apply:
 
 ### Directory `mem`
 
- * `misc/malloca.h`: `MALLOCA()` and `FREEA()` macros, which are a portable
+ * `mem/malloca.h`: `MALLOCA()` and `FREEA()` macros, which are a portable
    variant of `_malloca()` and `_freea()` from Windows SDKs by Microsoft.
    `MALLOCA()` allocates on stack if requested size below some threshold,
    for larger allocations it uses `malloc()`.
+
+ * `mem/memchunk.[hc]`: A simple chunk allocator, useful when program needs
+    to incrementally allocate many (small) blocks of memory which are eventually
+    all freed at the same time. In that situation this allocator is much cheaper
+    both in memory (much smaller overhead per-individual allocation) as well
+    as in CPU cycles (general purpose `malloc()` is quite expensive).
 
 ### Directory `misc`
 
