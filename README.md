@@ -4,7 +4,6 @@
 
 
 
-
 # C Reusables Readme
 
 Home: https://github.com/mity/c-reusables
@@ -39,6 +38,8 @@ The following rules apply:
  * `data/buffer.[hc]`: Simple growing buffer. It offers also a stack-like
    interface (push, pop operations) and array-like interface.
 
+ * `data/htable.[hc]`: Simple growing intrusive hash table.
+
  * `data/list.h`: Intrusive double-linked and single-linked lists.
 
  * `data/rbtree.[hc]`: Intrusive red-black tree.
@@ -59,7 +60,7 @@ The following rules apply:
 
  * `hash/crc32.[hc]`: 32-bit cyclic redundancy check function.
 
- * `hash/fnv1a.[hc]`: 32-bit and 64-bit Fowler–Noll–Vo (variant 1a) hash
+ * `hash/fnv1a.[hc]`: 32-bit and 64-bit Fowler-Noll-Vo (variant 1a) hash
    functions.
 
 ### Directory `mem`

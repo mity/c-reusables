@@ -17,6 +17,9 @@ add_definitions(-DCRE_TEST)
 add_executable(test-buffer acutest.h test-buffer.c ../data/buffer.h ../data/buffer.c)
 target_include_directories(test-buffer PRIVATE ../data)
 
+add_executable(test-htable acutest.h test-htable.c ../data/htable.h ../data/htable.c)
+target_include_directories(test-htable PRIVATE ../data)
+
 add_executable(test-list acutest.h test-list.c ../data/list.h)
 target_include_directories(test-list PRIVATE ../data)
 
