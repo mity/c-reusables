@@ -108,10 +108,11 @@
  *     MYCONTAINER* container = CONTAINEROF(ptr_to_s, MYCONTAINER, s_member);
  *
  *     ...  // do something with container.
- *
- *     // Of course this is valid only if we KNOW that PTR_TO_S really
- *     // points the the insides of the MYCONTAINER.
  * }
+ *
+ * Of course the example is valid ONLY if we KNOW that PTR_TO_S indeed points
+ * to MYSTRUCT inside some MYCONTAINER. The behavior is undefined if it does
+ * not.
  */
 #ifndef CONTAINEROF
     #define CONTAINEROF(ptr, type, member)  \
