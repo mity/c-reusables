@@ -115,7 +115,7 @@
  */
 #ifndef CONTAINEROF
     #define CONTAINEROF(ptr, type, member)  \
-                ((type*)((char*)(ptr) - OFFSETOF(type, member)))
+                ((type*)((char*)(1 ? (ptr) : &((type *)0)->member) - OFFSETOF(type, member)))
 #endif
 
 
