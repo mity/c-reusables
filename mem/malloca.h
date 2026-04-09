@@ -26,12 +26,13 @@
 #ifndef CRE_MALLOCA_H
 #define CRE_MALLOCA_H
 
-#include <malloc.h>
+#include <stdlib.h>
 
 #ifdef _WIN32
     /* Windows do not have <alloca.h>.
      * There is _alloca() in <malloc.h> instead. */
     #define CRE_alloca__ _alloca
+    #include <malloc.h>
 #else
     #include <alloca.h>
     #define CRE_alloca__ alloca
