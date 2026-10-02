@@ -1,12 +1,11 @@
-[![Build (GitHub workflow)](https://img.shields.io/github/actions/workflow/status/mity/c-reusables/ci-build.yml?logo=github)](https://github.com/mity/c-reusables/actions/workflows/ci-build.yml)
-[![Code Coverage (codecov.io)](https://img.shields.io/codecov/c/github/mity/c-reusables/master.svg?logo=codecov&label=code%20coverage)](https://codecov.io/github/mity/c-reusables)
-[![Coverity Scan Status](https://img.shields.io/coverity/scan/mity-c-reusables.svg?label=coverity%20scan)](https://scan.coverity.com/projects/mity-c-reusables)
-
-
 
 # C Reusables Readme
 
 Home: https://github.com/mity/c-reusables
+
+
+> [!IMPORTANT] This repository has been retired and is now read-only.
+> A moral successor to it can be found at https://github.com/mity/libex.
 
 
 ## Introduction
