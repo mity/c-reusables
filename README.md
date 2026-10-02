@@ -4,7 +4,8 @@
 Home: https://github.com/mity/c-reusables
 
 
-> [!IMPORTANT] This repository has been retired and is now read-only.
+> [!WARNING]
+> This repository has been retired and is now read-only.
 > A moral successor to it can be found at https://github.com/mity/libex.
 
 
